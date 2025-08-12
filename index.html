@@ -397,10 +397,13 @@
         };
 
         const startDrawing = (e) => {
+          e.preventDefault();
+          const posEvent = e.touches ? e.touches[0] : e;
+          
           if (activeTool === 'text') {
             const text = prompt('Escribe el texto que quieres añadir:', '');
             if (text) {
-              const pos = getPos(e);
+              const pos = getPos(posEvent);
               ctx.font = `${+sizeInput.value * 3}px Roboto`;
               ctx.fillStyle = '#000000';
               ctx.globalCompositeOperation = 'source-over';
@@ -415,7 +418,7 @@
           }
 
           isDrawing = true;
-          startPos = getPos(e);
+          startPos = getPos(posEvent);
           lastPos = startPos;
           
           if (activeTool === 'line' || activeTool === 'circle') {
@@ -425,7 +428,9 @@
 
         const draw = (e) => {
           if (!isDrawing) return;
-          const currentPos = getPos(e);
+          e.preventDefault();
+          const posEvent = e.touches ? e.touches[0] : e;
+          const currentPos = getPos(posEvent);
 
           if (activeTool === 'draw' || activeTool === 'erase') {
               ctx.lineWidth = +sizeInput.value;
@@ -446,23 +451,32 @@
         
         const endDrawing = async (e) => {
             if (!isDrawing) return;
-            isDrawing = false;
+            e.preventDefault();
+            const posEvent = e.changedTouches ? e.changedTouches[0] : e;
             
             if ((activeTool === 'line' || activeTool === 'circle') && savedCanvasState) {
                 ctx.putImageData(savedCanvasState, 0, 0);
-                drawFinalShape(startPos, getPos(e));
+                drawFinalShape(startPos, getPos(posEvent));
             }
             
+            isDrawing = false;
             savedCanvasState = null;
             scene.sketch = await getCanvasBlob(canvas);
             await update();
             $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
         };
 
+        // Eventos de Ratón
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', endDrawing);
         canvas.addEventListener('mouseleave', endDrawing);
+
+        // Eventos Táctiles para compatibilidad con móviles y tabletas
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', endDrawing);
+        canvas.addEventListener('touchcancel', endDrawing);
 
         $$('.btn[data-tool]', controls).forEach(btn => {
             btn.onclick = () => {
