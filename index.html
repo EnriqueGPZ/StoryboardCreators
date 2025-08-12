@@ -129,12 +129,8 @@
     
     .application-wrapper { background: var(--surface); }
     footer.site-footer { text-align: center; padding: 24px; font-size: 12px; color: var(--muted); background: var(--bg-alt); }
-
-    /* --- INICIO CAMBIOS --- */
-    .project-section { margin-bottom: 64px; }
-    .scene{background:var(--surface);margin-bottom:32px; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;}
-    /* --- FIN CAMBIOS --- */
     
+    .project-section { margin-bottom: 64px; }
     #app header{ display:flex; gap:16px; align-items:center; justify-content:flex-end; flex-wrap:wrap; padding:16px 24px; background:rgba(255,255,255,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); position:sticky; top:0; z-index:50; border-bottom:1px solid var(--line); }
     #app header .toolbar .btn{width:40px;height:40px;}
     #app header .toolbar .btn .material-symbols-rounded{font-size:22px;}
@@ -146,7 +142,7 @@
     input[type="text"]:focus,textarea:focus{outline:none;border-bottom-color:var(--acc);}
     textarea{min-height:120px;resize:vertical;}
     label{font-size:13px;color:var(--muted);font-weight:500;display:block;margin-bottom:8px;}
-    
+    .scene{background:var(--surface);margin-bottom:32px; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;}
     .scene-hd{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);}
     .scene-idx{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:0.5px;}
     .scene-ttl{flex:1;min-width:200px;font-size:16px;font-weight:700;border:none;background:transparent;padding:0;}
@@ -170,10 +166,14 @@
     .tab-content.active{display:block;}
 
     .thumbs{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:10px;}
-    .thumb{position:relative;background:var(--bg-alt);}
+    .thumb{position:relative;background:var(--bg-alt);overflow:hidden;border-radius:4px;}
     .thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;}
-    .thumb .x{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;font-size:14px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .thumb .x{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;font-size:14px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;}
     .thumb .x:hover{background:rgba(0,0,0,0.7);}
+    .thumb-name-wrapper { padding: 4px 8px 8px; background-color: var(--bg-alt); border-top: 1px solid var(--line); }
+    .thumb-name { font-size: 12px; text-align: center; color: var(--muted); padding: 4px; border-radius: 4px; word-break: break-all; cursor: text; transition: background-color .2s, box-shadow .2s; }
+    .thumb-name:focus { background-color: #fff; outline: none; box-shadow: 0 0 0 2px var(--acc); color: var(--txt); }
+
     .sketch{border:1px solid var(--line);overflow:hidden;}
     canvas{display:block;width:100%;height:auto;background:var(--canvas-bg);cursor:crosshair;}
     .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
@@ -364,10 +364,62 @@
         function drawTags() { tagsContainer.innerHTML = ''; (scene.tags || []).forEach(tag => { const tagEl = document.createElement('span'); tagEl.className = 'chip'; tagEl.innerHTML = `${escapeHtml(tag)} <span class="remove-tag" title="Quitar">&times;</span>`; $('.remove-tag', tagEl).onclick = async () => { scene.tags = scene.tags.filter(t => t !== tag); drawTags(); await update(); }; tagsContainer.appendChild(tagEl); }); }
         tagsInput.addEventListener('keydown', async e => { if (e.key === 'Enter' && tagsInput.value.trim() !== '') { e.preventDefault(); const newTags = tagsInput.value.trim().split(',').map(t => t.trim()).filter(Boolean); scene.tags.push(...newTags); scene.tags = [...new Set(scene.tags)]; drawTags(); await update(); tagsInput.value = ''; } });
         drawTags();
+        
         const thumbs = $('.thumbs', el);
         const fileInput = $('.file-refs', el);
         fileInput.onchange = async () => { const files = Array.from(fileInput.files || []); for (const f of files) { const blob = await fileToBlob(f); scene.refs.push({ id: uid(), name: f.name, data: blob }); } await updateAndRender(); fileInput.value = ''; };
-        function drawThumbs() { thumbs.innerHTML = ''; if (!scene.refs.length) { thumbs.innerHTML = '<div style="color:var(--muted); font-size:12px;">Sin imágenes de referencia.</div>'; return; } scene.refs.forEach(r => { const t = document.createElement('div'); t.className = 'thumb'; t.innerHTML = `<img alt="${escapeHtml(r.name)}"/><div class="x" title="Quitar imagen">&times;</div>`; if (r.data instanceof Blob) { const url = URL.createObjectURL(r.data); $('img', t).src = url; objectURLs.push(url); } $('.x', t).onclick = async () => { scene.refs = scene.refs.filter(x => x.id !== r.id); await updateAndRender(); }; thumbs.appendChild(t); }); }
+        
+        // --- INICIO CÓDIGO MODIFICADO ---
+        function drawThumbs() { 
+          thumbs.innerHTML = ''; 
+          if (!scene.refs.length) { 
+            thumbs.innerHTML = '<div style="color:var(--muted); font-size:12px;">Sube imágenes para verlas aquí.</div>'; 
+            return; 
+          } 
+          scene.refs.forEach(r => { 
+            const t = document.createElement('div'); 
+            t.className = 'thumb'; 
+            
+            t.innerHTML = `
+              <img alt="${escapeHtml(r.name)}"/>
+              <div class="thumb-name-wrapper">
+                  <p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar el nombre">${escapeHtml(r.name)}</p>
+              </div>
+              <div class="x" title="Quitar imagen">&times;</div>`;
+
+            if (r.data instanceof Blob) { 
+              const url = URL.createObjectURL(r.data); 
+              $('img', t).src = url; 
+              objectURLs.push(url); 
+            }
+            
+            $('.x', t).onclick = async () => { 
+              scene.refs = scene.refs.filter(x => x.id !== r.id); 
+              await updateAndRender(); 
+            };
+            
+            const nameEl = $('.thumb-name', t);
+            nameEl.addEventListener('keydown', e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                e.target.blur();
+              }
+            });
+            nameEl.addEventListener('blur', async () => {
+              const newName = nameEl.textContent.trim();
+              if (newName && r.name !== newName) {
+                r.name = newName;
+                $('img', t).alt = newName;
+                await update();
+              } else {
+                nameEl.textContent = r.name; // Revertir si está vacío
+              }
+            });
+            
+            thumbs.appendChild(t); 
+          }); 
+        }
+        // --- FIN CÓDIGO MODIFICADO ---
         drawThumbs();
         
         const canvas = $('canvas', el);
@@ -595,7 +647,7 @@
         <p>Cada secuencia tiene tres pestañas para organizar diferentes tipos de información:</p>
         <ol>
           <li><strong>Descripción Escenas:</strong> Un campo de texto libre para detallar las escenas que componen la secuencia. Describe los planos, diálogos, acciones, atrezo, notas de dirección o cualquier detalle técnico.</li>
-          <li><strong>Referencias:</strong> Sube imágenes que te sirvan de inspiración visual. Puedes eliminar una imagen haciendo clic en la <strong>&times;</strong> que aparece sobre ella.</li>
+          <li><strong>Referencias:</strong> Sube imágenes que te sirvan de inspiración visual. Puedes eliminar una imagen haciendo clic en la <strong>&times;</strong> que aparece sobre ella. <strong>¡Nuevo!</strong> Ahora puedes hacer clic en el nombre del archivo debajo de cada imagen para editarlo.</li>
           <li><strong>Storyboard:</strong> ¡El corazón de la herramienta! Un lienzo para que dibujes los planos clave de tu secuencia.
             <ul>
                 <li>Usa la barra de herramientas para seleccionar un útil: <strong>Pincel</strong>, <strong>Línea</strong>, <strong>Círculo</strong>, <strong>Texto</strong> o <strong>Borrador</strong>.</li>
