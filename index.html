@@ -369,7 +369,6 @@
         const fileInput = $('.file-refs', el);
         fileInput.onchange = async () => { const files = Array.from(fileInput.files || []); for (const f of files) { const blob = await fileToBlob(f); scene.refs.push({ id: uid(), name: f.name, data: blob }); } await updateAndRender(); fileInput.value = ''; };
         
-        // --- INICIO CÓDIGO MODIFICADO ---
         function drawThumbs() { 
           thumbs.innerHTML = ''; 
           if (!scene.refs.length) { 
@@ -419,7 +418,6 @@
             thumbs.appendChild(t); 
           }); 
         }
-        // --- FIN CÓDIGO MODIFICADO ---
         drawThumbs();
         
         const canvas = $('canvas', el);
@@ -573,7 +571,49 @@
       $('#synopsis').addEventListener('input', async e => { state.synopsis = e.target.value; await persist(); });
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Mi Nuevo Proyecto'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
-      $('#btn-export-json').onclick = () => showDialog({ title: 'Exportar a JSON', message: 'Se generará un archivo .json con todo tu proyecto. El proceso puede tardar si hay muchas imágenes.', confirmText: 'Exportar', onConfirm: async () => { const stateForExport = JSON.parse(JSON.stringify(state)); for (const scene of stateForExport.scenes) { if (scene.sketch instanceof Blob) { scene.sketch = await blobToDataURL(scene.sketch); } if (scene.refs) { for (const ref of scene.refs) { if (ref.data instanceof Blob) { ref.data = await blobToDataURL(ref.data); } } } } const blob = new Blob([JSON.stringify(stateForExport, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${slug(state.title || 'proyecto')}.json`; a.click(); URL.revokeObjectURL(a.href); } });
+      
+      // --- CÓDIGO CORREGIDO PARA EXPORTAR JSON ---
+      $('#btn-export-json').onclick = () => showDialog({ 
+        title: 'Exportar a JSON', 
+        message: 'Se generará un archivo .json con todo tu proyecto. El proceso puede tardar si hay muchas imágenes.', 
+        confirmText: 'Exportar', 
+        onConfirm: async () => {
+          // 1. Crea una copia del estado para no modificar el original en vivo
+          const stateForExport = JSON.parse(JSON.stringify(state));
+
+          // 2. Itera sobre el estado ORIGINAL y la COPIA simultáneamente
+          for (let i = 0; i < state.scenes.length; i++) {
+            const originalScene = state.scenes[i];
+            const exportScene = stateForExport.scenes[i];
+
+            // 3. Convierte el `sketch` si existe
+            if (originalScene.sketch instanceof Blob) {
+              exportScene.sketch = await blobToDataURL(originalScene.sketch);
+            }
+
+            // 4. Convierte las imágenes de referencia si existen
+            if (originalScene.refs && originalScene.refs.length) {
+              for (let j = 0; j < originalScene.refs.length; j++) {
+                const originalRef = originalScene.refs[j];
+                const exportRef = exportScene.refs[j];
+                if (originalRef.data instanceof Blob) {
+                  exportRef.data = await blobToDataURL(originalRef.data);
+                }
+              }
+            }
+          }
+
+          // 5. Ahora sí, crea el Blob JSON con los datos correctos y descárgalo
+          const blob = new Blob([JSON.stringify(stateForExport, null, 2)], { type: 'application/json' }); 
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `${slug(state.title || 'proyecto')}.json`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
+      });
+      // --- FIN DEL CÓDIGO CORREGIDO ---
+
       $('#import-json').onchange = async (e) => { const f = e.target.files?.[0]; if (!f) return; try { const txt = await f.text(); const data = JSON.parse(txt); if (!data || typeof data.title !== 'string' || !Array.isArray(data.scenes)) { throw new Error('Formato JSON inválido.'); } showDialog({ title: 'Importar Proyecto', message: 'Se han detectado datos de imágenes. La conversión puede tardar unos segundos. ¿Deseas continuar?', confirmText: 'Importar', onConfirm: async () => { for (const scene of data.scenes) { if (typeof scene.sketch === 'string' && scene.sketch.startsWith('data:image')) { scene.sketch = dataURLToBlob(scene.sketch); } if (scene.refs) { for (const ref of scene.refs) { if (typeof ref.data === 'string' && ref.data.startsWith('data:image')) { ref.data = dataURLToBlob(ref.data); } } } } state = data; state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); await persist(); render(); } }); } catch (err) { alert('Error al importar el archivo.\n\n' + err.message); } e.target.value = ''; };
       $('#btn-export-pdf').onclick = () => showDialog({ title: 'Exportar a PDF', message: 'Se generará un archivo PDF de tu proyecto. El proceso puede ser lento si hay muchas imágenes.', confirmText: 'Generar PDF', onConfirm: async () => { const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: 'pt', format: 'a4' }); const MARGIN = 50; const pageW = doc.internal.pageSize.getWidth(); const pageH = doc.internal.pageSize.getHeight(); let y = MARGIN + 20; doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(`Autor: ${state.author}`, MARGIN, y); y += 20; } doc.setFontSize(10); doc.text(`Total de secuencias: ${state.scenes.length}`, MARGIN, y); y += 15; doc.text(`Generado el: ${new Date().toLocaleDateString()}`, MARGIN, y); y += 35; if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } for (let i = 0; i < state.scenes.length; i++) { doc.addPage(); const s = state.scenes[i]; y = MARGIN; if (s.statusColor) { const colorVar = getComputedStyle(document.documentElement).getPropertyValue(`--${s.statusColor}`).trim(); doc.setFillColor(colorVar); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(`SECUENCIA ${i + 1}: ${s.title || 'Sin título'}`, MARGIN, y); y += 30; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); if (s.location) { doc.text(`Localización: ${s.location}`, MARGIN, y); y += 15; } if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } if (s.tags && s.tags.length > 0) { const tagsText = `Etiquetas: ${s.tags.join(', ')}`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } if (s.sketch instanceof Blob) { const w = pageW - MARGIN * 2; const h = w * 9 / 16; if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; const sketchData = await blobToDataURL(s.sketch); doc.addImage(sketchData, 'PNG', MARGIN, y, w, h); y += h + 25; doc.setFont('helvetica', 'normal'); } if (s.refs && s.refs.length) { if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; let currentX = MARGIN; let currentY = y; for (let k = 0; k < imgs.length; k++) { const ref = imgs[k]; if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } const col = k % cols; currentX = MARGIN + col * (imgW + gap); if (ref.data instanceof Blob) { try { const refData = await blobToDataURL(ref.data); doc.addImage(refData, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } } if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } } y = currentY; } } doc.save(`${slug(state.title || 'proyecto')}.pdf`); } });
       
