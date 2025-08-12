@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <title>Storyboard for Creators - Herramienta Online y Gratuita</title>
+  
+  <meta name="description" content="Crea storyboards profesionales para tus vídeos de YouTube, cursos o proyectos creativos. Herramienta online, gratuita y fácil de usar. Planifica tus secuencias, notas y referencias visuales en un solo lugar.">
+  <meta name="keywords" content="storyboard online, creador de storyboard, herramienta para youtubers, planificador de vídeo, guion gráfico, storyboard gratis, video planner, storyboard creator">
+  <meta name="author" content="Storyboard for Creators">
+  <link rel="canonical" href="https://[TU-URL-AQUI.com]/final.html" />
+
+  <meta property="og:title" content="Storyboard for Creators - Herramienta Online Gratuita" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://[TU-URL-AQUI.com]/final.html" />
+  <meta property="og:image" content="https://[URL-A-UNA-IMAGEN-PREVIEW.png]" />
+  <meta property="og:description" content="Planifica tus vídeos como un profesional con esta herramienta de storyboard online y gratuita. Ideal para creadores de contenido, cineastas y educadores." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
+  
+  <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Storyboard for Creators",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Una herramienta online y gratuita para crear storyboards detallados, planificar secuencias, añadir notas, referencias visuales y exportar a PDF y JSON. Diseñada para creadores de contenido, cineastas y educadores.",
+        "url": "https://[TU-URL-AQUI.com]/final.html"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Es esta herramienta realmente gratuita?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí, 'Storyboard for Creators' es completamente gratuita. No hay funciones de pago ni suscripciones. Todos los datos se guardan localmente en tu propio navegador."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Dónde se guardan mis datos?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tus proyectos se guardan de forma segura en el almacenamiento de tu navegador (usando IndexedDB). Esto significa que son privados y solo accesibles desde el dispositivo y navegador que utilizas. Nadie más puede verlos."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Puedo usar mis proyectos en otro ordenador?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí. Puedes usar la función 'Exportar a JSON' para guardar una copia de seguridad de tu proyecto como un archivo. Luego, en otro ordenador, puedes usar 'Importar desde JSON' para cargar y continuar trabajando en tu proyecto."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root{
+      --bg: #f9f9fb;
+      --surface: #ffffff;
+      --line: #ebebeb;
+      --txt: #1d1d1f;
+      --muted: #86868b;
+      --acc: #007aff;
+      --red: #d70015;
+      --orange: #ff9500;
+      --green: #34c759;
+      --canvas-bg: #f5f5f7;
+      --bg-alt: #f5f5f7; 
+    }
+    html { scroll-behavior: smooth; }
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:'Roboto',sans-serif;color:var(--txt);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    .container{max-width:800px;margin:48px auto;padding:0 24px 64px;}
+    .btn{appearance:none;border:none;background:transparent;color:var(--txt);padding:0;font-size:13px;font-weight:500;cursor:pointer;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:background-color .2s,color .2s,border-color .2s;border-radius:0; text-decoration: none;}
+    
+    .site-header { background: var(--bg-alt); padding: 16px 24px; border-bottom: 1px solid var(--line); }
+    .site-header h1 { font-size: 22px; margin: 0; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+    .app-icon { width: 28px; height: auto; }
+
+    .hero { text-align: center; padding: 80px 24px; background: var(--bg-alt); }
+    .hero h2 { font-size: 42px; font-weight: 700; margin: 0 0 16px 0; color: var(--txt); }
+    .hero p { font-size: 18px; color: var(--muted); max-width: 600px; margin: 0 auto 32px auto; line-height: 1.6; }
+    .hero .btn.primary { font-size: 16px; padding: 12px 24px; border-radius: 8px; background-color: var(--acc); color: #fff; }
+    .hero .btn.primary:hover { background-color: #0071e3; }
+    
+    .features { padding: 60px 24px; background: var(--bg-alt); }
+    .features h2 { text-align: center; font-size: 32px; margin: 0 0 48px 0; }
+    
+    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; max-width: 1000px; margin: 0 auto; }
+    @media (max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .features-grid { grid-template-columns: 1fr; } }
+    
+    .feature-item { text-align: center; }
+    .feature-item .material-symbols-rounded { font-size: 40px; color: var(--acc); margin-bottom: 16px; }
+    .feature-item h3 { font-size: 18px; margin: 0 0 8px 0; }
+    .feature-item p { font-size: 14px; color: var(--muted); line-height: 1.5; margin: 0; }
+    
+    .post-app-section { padding: 60px 24px; background: var(--bg-alt); border-top: 1px solid var(--line); }
+    .post-app-section h2 { text-align: center; font-size: 32px; margin: 0 0 48px 0; }
+    
+    .faq-container { max-width: 700px; margin: 0 auto; }
+    .faq-container details { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; }
+    .faq-container summary { font-size: 16px; font-weight: 500; padding: 16px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    .faq-container summary::-webkit-details-marker { display: none; }
+    .faq-container summary::after { content: '+'; font-size: 24px; color: var(--muted); }
+    .faq-container details[open] summary::after { content: '−'; }
+    .faq-container .answer { padding: 0 16px 16px 16px; font-size: 14px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--line); margin-top: 8px; }
+    
+    .application-wrapper { background: var(--surface); }
+    footer.site-footer { text-align: center; padding: 24px; font-size: 12px; color: var(--muted); background: var(--bg-alt); }
+
+    #app header{ display:flex; gap:16px; align-items:center; justify-content:flex-end; flex-wrap:wrap; padding:16px 24px; background:rgba(255,255,255,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); position:sticky; top:0; z-index:50; border-bottom:1px solid var(--line); }
+    #app header .toolbar .btn{width:40px;height:40px;}
+    #app header .toolbar .btn .material-symbols-rounded{font-size:22px;}
+    #app header .toolbar .btn.primary{background-color:var(--acc);color:#fff;}
+    #app header .toolbar .btn.alt{color:var(--muted);}
+    #app header .toolbar .btn.red{color:var(--red);}
+    
+    input[type="text"],textarea{width:100%;background:var(--bg-alt);border:none;border-bottom:1px solid var(--line);color:var(--txt);padding:10px 4px;font-size:14px;border-radius:0;transition:border-color .2s;}
+    input[type="text"]:focus,textarea:focus{outline:none;border-bottom-color:var(--acc);}
+    textarea{min-height:120px;resize:vertical;}
+    label{font-size:13px;color:var(--muted);font-weight:500;display:block;margin-bottom:8px;}
+    .scene{background:var(--surface);margin-bottom:32px; border: 1px solid var(--line);}
+    .scene-hd{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);}
+    .scene-idx{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:0.5px;}
+    .scene-ttl{flex:1;min-width:200px;font-size:16px;font-weight:700;border:none;background:transparent;padding:0;}
+    .scene-ttl:focus{outline:none;}
+    .scene .bd{padding:20px;}
+    .scene-hd .toolbar{display:flex; align-items:center; gap: 4px;}
+    .scene-hd .btn{width:32px;height:32px;color:var(--muted);}
+    .scene-hd .btn:hover{background-color:var(--line);color:var(--txt);}
+    .scene-hd .btn.red:hover{background-color:#fff5f5;color:var(--red);}
+    .scene-hd .material-symbols-rounded{font-size:20px;}
+    .tags-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+    .chip{font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--line);padding:4px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:500;}
+    .remove-tag{cursor:pointer;font-size:16px;line-height:1;font-weight:400;}
+    .remove-tag:hover{color:var(--txt);}
+    .tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:20px;}
+    .tab{padding:10px 16px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;position:relative;}
+    .tab.active{color:var(--txt);border-color:var(--txt);}
+    .tab.has-content:not(.active)::after{content:'';display:inline-block;width:6px;height:6px;background-color:var(--acc);border-radius:50%;margin-left:8px;vertical-align:2px;}
+    
+    .tab-content{display:none;padding-top:8px;}
+    .tab-content.active{display:block;}
+
+    .thumbs{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:10px;}
+    .thumb{position:relative;background:var(--bg-alt);}
+    .thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;}
+    .thumb .x{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;font-size:14px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .thumb .x:hover{background:rgba(0,0,0,0.7);}
+    .sketch{border:1px solid var(--line);overflow:hidden;}
+    canvas{display:block;width:100%;height:auto;background:var(--canvas-bg);cursor:crosshair;}
+    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+    .controls .btn{padding:8px 12px;border:1px solid var(--line);}
+    .controls .btn .material-symbols-rounded { font-size: 20px; margin-right: 4px; }
+    .controls .btn.red{border:1px solid var(--red);}
+    .controls .btn.active{background-color:var(--acc);color:#fff;border-color:var(--acc);}
+    .grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+    @media (max-width: 500px){.grid-layout{grid-template-columns:1fr;}}
+    .dialog-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
+    .dialog-overlay:not([hidden]){opacity:1;visibility:visible;}
+    .dialog-box{background:var(--surface);padding:24px;border-radius:12px;width:90%;max-width:400px;transform:scale(0.95);transition:transform .2s; border: 1px solid var(--line);}
+    .dialog-overlay:not([hidden]) .dialog-box{transform:scale(1);}
+    .dialog-box h3{margin:0 0 8px 0;font-size:18px;font-weight:700;color:var(--txt);}
+    .dialog-box p{margin:0 0 24px 0;font-size:14px;color:var(--muted);line-height:1.5;}
+    .dialog-actions{display:flex;justify-content:flex-end;gap:12px;}
+    .dialog-actions .btn{padding:8px 16px;border-radius:8px;}
+    .dialog-actions .btn.primary{background-color:var(--acc);color:#fff;}
+    
+    .location-wrapper { position: relative; }
+    .btn-location-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; color: var(--muted); border-radius: 50%; }
+    .btn-location-link:hover { background-color: transparent; color: var(--txt); }
+    .btn-location-link .material-symbols-rounded { font-size: 20px; }
+    .btn-location-link.has-link { color: var(--acc); }
+    .btn-location-link.has-link:hover { color: #0071e3; }
+
+    .status-dot-wrapper { display: flex; align-items: center; border-left: 1px solid var(--line); padding-left: 12px; margin-left: 8px; }
+    .status-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid var(--line); background-color: var(--surface); transition: background-color .2s, border-color .2s; }
+    .status-dot.red { background-color: var(--red); border-color: var(--red); }
+    .status-dot.orange { background-color: var(--orange); border-color: var(--orange); }
+    .status-dot.green { background-color: var(--green); border-color: var(--green); }
+
+    .help-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1010; opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; }
+    .help-modal-overlay:not([hidden]) { opacity: 1; visibility: visible; }
+    .help-modal-box { background: var(--surface); width: 90%; max-width: 700px; max-height: 80vh; overflow-y: auto; border-radius: 12px; position: relative; transform: scale(0.95); transition: transform 0.2s; }
+    .help-modal-overlay:not([hidden]) .help-modal-box { transform: scale(1); }
+    .help-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); }
+    .help-modal-header h2 { font-size: 20px; margin: 0; }
+    .help-modal-close { font-size: 24px; cursor: pointer; color: var(--muted); }
+    .help-modal-close:hover { color: var(--txt); }
+    .help-modal-content { padding: 0 24px 24px; }
+    .help-modal-content h3 { font-size: 22px; margin: 40px 0 16px 0; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+    .help-modal-content h4 { font-size: 16px; margin: 24px 0 8px 0; font-weight: 700; }
+    .help-modal-content p, .help-modal-content li { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .help-modal-content ul { padding-left: 20px; margin-top: 0; }
+    .help-modal-content ol { padding-left: 20px; margin-top: 0; }
+    .help-modal-content strong { color: var(--txt); font-weight: 500; }
+    .help-modal-content code { background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>
+      <svg class="app-icon" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="28" height="20" fill="var(--red)"/><polygon points="11,5 11,15 19,10" fill="white"/></svg>
+      Storyboard for Creators
+    </h1>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>Crea Storyboards Profesionales, Fácil y Rápido.</h2>
+      <p>La herramienta definitiva para creadores de contenido, cineastas y educadores. Planifica tus vídeos, organiza tus ideas y visualiza tu proyecto final, todo en un solo lugar y completamente gratis.</p>
+      <a href="#app" class="btn primary">Empezar a Crear Ahora</a>
+    </section>
+
+    <section class="features">
+      <h2>Características Principales</h2>
+      <div class="features-grid">
+        <div class="feature-item"><span class="material-symbols-rounded">layers</span><h3>Planificación por Secuencias</h3><p>Organiza tu guion en secuencias. Cada secuencia puede contener una o varias escenas detalladas en su descripción.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">draw</span><h3>Storyboard Integrado</h3><p>Dibuja tus planos directamente en la aplicación con nuestro lienzo digital. Una forma visual y rápida de plasmar tus ideas.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">collections</span><h3>Referencias Visuales</h3><p>Sube imágenes de referencia para inspiración de estilo, paletas de color, localizaciones o ejemplos de planos.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">link</span><h3>Enlaces de Localización</h3><p>Añade URLs a tus localizaciones para un acceso rápido a Google Maps, webs de estudios o cualquier referencia online.</p></div>
+      </div>
+    </section>
+
+    <section id="app" class="application-wrapper">
+      <header>
+        <div class="toolbar">
+          <button class="btn primary" id="btn-add" title="Añadir nueva secuencia"><span class="material-symbols-rounded">add</span></button>
+          <button class="btn alt" id="btn-export-pdf" title="Exportar a PDF"><span class="material-symbols-rounded">picture_as_pdf</span></button>
+          <button class="btn alt" id="btn-export-json" title="Exportar a JSON"><span class="material-symbols-rounded">data_object</span></button>
+          <label class="btn alt" title="Importar desde JSON"><span class="material-symbols-rounded">upload_file</span><input id="import-json" type="file" accept="application/json" hidden /></label>
+          <button class="btn red" id="btn-clear" title="Vaciar proyecto"><span class="material-symbols-rounded">delete_sweep</span></button>
+          <button class="btn alt" id="btn-help" title="Ayuda"><span class="material-symbols-rounded">help</span></button>
+        </div>
+      </header>
+      <div class="container">
+        <div class="project-section">
+          <div style="margin-bottom:24px;"><label for="title">Título del proyecto</label><input type="text" id="title" placeholder="p. ej., Review de la nueva cámara X" style="font-size:24px;font-weight:700;padding:12px 4px"/></div>
+          <div class="grid-layout" style="margin-bottom:24px;"><div><label for="author">Autor</label><input type="text" id="author" placeholder="Tu nombre"/></div><div></div></div>
+          <div><label for="synopsis">Sinopsis del proyecto</label><textarea id="synopsis" placeholder="Idea principal, público objetivo, tono del vídeo, puntos clave a cubrir..." style="min-height:150px;"></textarea></div>
+        </div>
+        <div id="scenes"></div>
+      </div>
+    </section>
+    
+    <section class="post-app-section">
+        <h2>Preguntas Frecuentes</h2>
+        <div class="faq-container">
+            <details><summary>¿Es esta herramienta realmente gratuita?</summary><div class="answer">Sí, 'Storyboard for Creators' es completamente gratuita. No hay funciones de pago ni suscripciones. Todos los datos se guardan localmente en tu propio navegador.</div></details>
+            <details><summary>¿Dónde se guardan mis datos?</summary><div class="answer">Tus proyectos se guardan de forma segura en el almacenamiento de tu navegador (usando IndexedDB). Esto significa que son privados y solo accesibles desde el dispositivo y navegador que utilizas. Nadie más puede verlos.</div></details>
+            <details><summary>¿Puedo usar mis proyectos en otro ordenador?</summary><div class="answer">Sí. Puedes usar la función 'Exportar a JSON' para guardar una copia de seguridad de tu proyecto como un archivo. Luego, en otro ordenador, puedes usar 'Importar desde JSON' para cargar y continuar trabajando en tu proyecto.</div></details>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+      <p>&copy; 2024 Creado por Enrique Gil. Storyboard for Creators es una herramienta de código abierto para la comunidad creativa.</p>
+    </footer>
+  </main>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    const db = new Dexie('storyboardAppDB');
+    db.version(1).stores({ project: 'id' });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const $ = (sel, p = document) => p.querySelector(sel);
+      const $$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
+      const uid = () => Math.random().toString(36).slice(2);
+      
+      const defaultScene = () => ({ id: uid(), title: 'Nueva secuencia', location: '', locationURL: null, description: '', tags: [], sketch: null, refs: [], statusColor: null });
+      
+      const PROJECT_ID = 1;
+      let state = { title: 'Storyboard Project', author: '', synopsis: '', scenes: [defaultScene()] };
+      let objectURLs = [];
+
+      const blobToDataURL = (blob) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+      const dataURLToBlob = (dataurl) => { const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]); let n = bstr.length; const u8arr = new Uint8Array(n); while(n--){ u8arr[n] = bstr.charCodeAt(n); } return new Blob([u8arr], {type:mime}); }
+      const getCanvasBlob = (canvas) => new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const fileToBlob = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(new Blob([reader.result], {type: file.type})); reader.onerror = reject; reader.readAsArrayBuffer(file); });
+
+      async function persist() { try { await db.project.put({ id: PROJECT_ID, ...state }); } catch (error) { console.error("Error al guardar en IndexedDB:", error); } }
+      async function loadInitialState() { try { const savedState = await db.project.get(PROJECT_ID); if (savedState) { delete savedState.id; Object.assign(state, savedState); state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); } } catch (error) { console.error("Error al cargar desde IndexedDB:", error); } }
+      function revokeObjectURLs() { objectURLs.forEach(url => URL.revokeObjectURL(url)); objectURLs = []; }
+
+      function render() {
+        revokeObjectURLs();
+        $('#title').value = state.title;
+        $('#author').value = state.author;
+        $('#synopsis').value = state.synopsis;
+        const wrap = $('#scenes');
+        wrap.innerHTML = '';
+        state.scenes.forEach((s, i) => wrap.appendChild(renderScene(s, i)));
+      }
+      
+      function renderScene(scene, index) {
+        const el = document.createElement('div');
+        el.className = 'scene';
+        el.dataset.id = scene.id;
+        
+        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia: planos, diálogos, acciones, audio, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <button class="btn red clear" style="margin-left: auto;">Limpiar</button> </div> </div> </div>`;
+        
+        const updateAndRender = async () => { await persist(); render(); };
+        const update = async () => { await persist(); };
+        
+        $('.scene-ttl', el).addEventListener('input', async e => { scene.title = e.target.value; await update(); });
+        $('.inp-location', el).addEventListener('input', async e => { scene.location = e.target.value; await update(); });
+        const linkBtn = $('.btn-location-link', el);
+        if (scene.locationURL) { linkBtn.classList.add('has-link'); }
+        linkBtn.onclick = async () => { if (scene.locationURL) { window.open(scene.locationURL, '_blank', 'noopener,noreferrer'); } else { const url = prompt('Pega la URL para esta localización (p. ej., de Google Maps):', 'https://'); if (url && url.trim() !== 'https://' && url.trim() !== '') { scene.locationURL = url.trim(); await updateAndRender(); } } };
+        linkBtn.addEventListener('contextmenu', async (e) => { e.preventDefault(); if (!scene.locationURL) return; const newURL = prompt('Edita o elimina el enlace de la localización:', scene.locationURL); if (newURL === null) { return; } scene.locationURL = newURL.trim() === '' ? null : newURL.trim(); await updateAndRender(); });
+        $('.inp-desc', el).addEventListener('input', async e => { scene.description = e.target.value; await update(); });
+        $('.up', el).onclick = () => { if (index > 0) { swap(state.scenes, index, index - 1); updateAndRender(); } };
+        $('.down', el).onclick = () => { if (index < state.scenes.length - 1) { swap(state.scenes, index, index + 1); updateAndRender(); } };
+        $('.dup', el).onclick = () => { const clone = JSON.parse(JSON.stringify(scene)); clone.id = uid(); state.scenes.splice(index + 1, 0, clone); updateAndRender(); };
+        $('.del', el).onclick = () => showDialog({ title: 'Eliminar Secuencia', message: '¿Seguro que quieres eliminar esta secuencia? Esta acción no se puede deshacer.', confirmText: 'Sí, eliminar', onConfirm: () => { state.scenes.splice(index, 1); if (!state.scenes.length) state.scenes.push(defaultScene()); updateAndRender(); } });
+        
+        const statusDot = $('.status-dot', el);
+        const colorCycle = [null, 'red', 'orange', 'green'];
+        if (scene.statusColor) {
+            statusDot.classList.add(scene.statusColor);
+        }
+        statusDot.onclick = async () => {
+            const currentIndex = colorCycle.indexOf(scene.statusColor);
+            const nextIndex = (currentIndex + 1) % colorCycle.length;
+            scene.statusColor = colorCycle[nextIndex];
+            await updateAndRender();
+        };
+
+        const tabs = $$('.tab', el);
+        tabs.forEach(tab => { tab.onclick = () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); $$('.tab-content', el).forEach(c => c.classList.toggle('active', c.dataset.content === tab.dataset.tab)); }; });
+        if (scene.refs && scene.refs.length > 0) $('.tab[data-tab="refs"]', el).classList.add('has-content');
+        if (scene.sketch) $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
+        const tagsContainer = $('.tags-container', el);
+        const tagsInput = $('.inp-tags', el);
+        function drawTags() { tagsContainer.innerHTML = ''; (scene.tags || []).forEach(tag => { const tagEl = document.createElement('span'); tagEl.className = 'chip'; tagEl.innerHTML = `${escapeHtml(tag)} <span class="remove-tag" title="Quitar">&times;</span>`; $('.remove-tag', tagEl).onclick = async () => { scene.tags = scene.tags.filter(t => t !== tag); drawTags(); await update(); }; tagsContainer.appendChild(tagEl); }); }
+        tagsInput.addEventListener('keydown', async e => { if (e.key === 'Enter' && tagsInput.value.trim() !== '') { e.preventDefault(); const newTags = tagsInput.value.trim().split(',').map(t => t.trim()).filter(Boolean); scene.tags.push(...newTags); scene.tags = [...new Set(scene.tags)]; drawTags(); await update(); tagsInput.value = ''; } });
+        drawTags();
+        const thumbs = $('.thumbs', el);
+        const fileInput = $('.file-refs', el);
+        fileInput.onchange = async () => { const files = Array.from(fileInput.files || []); for (const f of files) { const blob = await fileToBlob(f); scene.refs.push({ id: uid(), name: f.name, data: blob }); } await updateAndRender(); fileInput.value = ''; };
+        function drawThumbs() { thumbs.innerHTML = ''; if (!scene.refs.length) { thumbs.innerHTML = '<div style="color:var(--muted); font-size:12px;">Sin imágenes de referencia.</div>'; return; } scene.refs.forEach(r => { const t = document.createElement('div'); t.className = 'thumb'; t.innerHTML = `<img alt="${escapeHtml(r.name)}"/><div class="x" title="Quitar imagen">&times;</div>`; if (r.data instanceof Blob) { const url = URL.createObjectURL(r.data); $('img', t).src = url; objectURLs.push(url); } $('.x', t).onclick = async () => { scene.refs = scene.refs.filter(x => x.id !== r.id); await updateAndRender(); }; thumbs.appendChild(t); }); }
+        drawThumbs();
+        
+        const canvas = $('canvas', el);
+        const ctx = canvas.getContext('2d');
+        const controls = $('.controls', el);
+        const sizeInput = $('.size', el);
+        if (scene.sketch instanceof Blob) loadImageToCanvas(scene.sketch, canvas, ctx);
+        
+        let activeTool = 'draw';
+        let isDrawing = false;
+        let startPos = null;
+        let lastPos = null;
+        let savedCanvasState = null;
+
+        const getPos = (e) => getXY(e, canvas);
+
+        const drawFinalShape = (start, end) => {
+            ctx.lineWidth = +sizeInput.value;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000000';
+            ctx.globalCompositeOperation = 'source-over';
+            
+            ctx.beginPath();
+            if (activeTool === 'line') {
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+            } else if (activeTool === 'circle') {
+                const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+                ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
+            }
+            ctx.stroke();
+        };
+
+        const startDrawing = (e) => {
+          if (activeTool === 'text') {
+            const text = prompt('Escribe el texto que quieres añadir:', '');
+            if (text) {
+              const pos = getPos(e);
+              ctx.font = `${+sizeInput.value * 3}px Roboto`;
+              ctx.fillStyle = '#000000';
+              ctx.globalCompositeOperation = 'source-over';
+              ctx.fillText(text, pos.x, pos.y);
+              (async () => {
+                scene.sketch = await getCanvasBlob(canvas);
+                await update();
+                $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
+              })();
+            }
+            return;
+          }
+
+          isDrawing = true;
+          startPos = getPos(e);
+          lastPos = startPos;
+          
+          if (activeTool === 'line' || activeTool === 'circle') {
+             savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          }
+        };
+
+        const draw = (e) => {
+          if (!isDrawing) return;
+          const currentPos = getPos(e);
+
+          if (activeTool === 'draw' || activeTool === 'erase') {
+              ctx.lineWidth = +sizeInput.value;
+              ctx.lineCap = 'round';
+              ctx.strokeStyle = '#000000';
+              ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over';
+              
+              ctx.beginPath();
+              ctx.moveTo(lastPos.x, lastPos.y);
+              ctx.lineTo(currentPos.x, currentPos.y);
+              ctx.stroke();
+              lastPos = currentPos;
+          } else if (savedCanvasState) {
+             ctx.putImageData(savedCanvasState, 0, 0);
+             drawFinalShape(startPos, currentPos);
+          }
+        };
+        
+        const endDrawing = async (e) => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            
+            if ((activeTool === 'line' || activeTool === 'circle') && savedCanvasState) {
+                ctx.putImageData(savedCanvasState, 0, 0);
+                drawFinalShape(startPos, getPos(e));
+            }
+            
+            savedCanvasState = null;
+            scene.sketch = await getCanvasBlob(canvas);
+            await update();
+            $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
+        };
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endDrawing);
+        canvas.addEventListener('mouseleave', endDrawing);
+
+        $$('.btn[data-tool]', controls).forEach(btn => {
+            btn.onclick = () => {
+                activeTool = btn.dataset.tool;
+                $$('.btn[data-tool]', controls).forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            };
+        });
+        
+        $('.clear', controls).onclick = async () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            scene.sketch = null;
+            await update(); 
+            $('.tab[data-tab="storyboard"]', el).classList.remove('has-content');
+        };
+
+        return el;
+      }
+      
+      const dialog = { overlay: $('#custom-dialog-overlay'), title: $('#dialog-title'), message: $('#dialog-message'), btnConfirm: $('#dialog-btn-confirm'), btnCancel: $('#dialog-btn-cancel') };
+      let onConfirmCallback = null;
+      function showDialog({ title, message, confirmText = 'Continuar', onConfirm }) { dialog.title.textContent = title; dialog.message.textContent = message; dialog.btnConfirm.textContent = confirmText; onConfirmCallback = onConfirm; dialog.overlay.hidden = false; }
+      function hideDialog() { dialog.overlay.hidden = true; onConfirmCallback = null; }
+      dialog.btnConfirm.onclick = () => { if (typeof onConfirmCallback === 'function') { onConfirmCallback(); } hideDialog(); };
+      dialog.btnCancel.onclick = hideDialog;
+      dialog.overlay.onclick = (e) => { if (e.target === dialog.overlay) hideDialog(); };
+
+      const helpModal = { overlay: $('#help-modal-overlay'), btnOpen: $('#btn-help'), btnClose: $('#help-modal-close') };
+      helpModal.btnOpen.onclick = () => { helpModal.overlay.hidden = false; };
+      helpModal.btnClose.onclick = () => { helpModal.overlay.hidden = true; };
+      helpModal.overlay.onclick = (e) => { if (e.target === helpModal.overlay) helpModal.overlay.hidden = true; };
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !helpModal.overlay.hidden) { helpModal.overlay.hidden = true; } });
+      
+      function loadImageToCanvas(blob, canvas, ctx) { const url = URL.createObjectURL(blob); const img = new Image(); img.onload = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); URL.revokeObjectURL(url); }; img.src = url; }
+      $('#title').addEventListener('input', async e => { state.title = e.target.value; await persist(); });
+      $('#author').addEventListener('input', async e => { state.author = e.target.value; await persist(); });
+      $('#synopsis').addEventListener('input', async e => { state.synopsis = e.target.value; await persist(); });
+      $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
+      $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Mi Nuevo Proyecto'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
+      $('#btn-export-json').onclick = () => showDialog({ title: 'Exportar a JSON', message: 'Se generará un archivo .json con todo tu proyecto. El proceso puede tardar si hay muchas imágenes.', confirmText: 'Exportar', onConfirm: async () => { const stateForExport = JSON.parse(JSON.stringify(state)); for (const scene of stateForExport.scenes) { if (scene.sketch instanceof Blob) { scene.sketch = await blobToDataURL(scene.sketch); } if (scene.refs) { for (const ref of scene.refs) { if (ref.data instanceof Blob) { ref.data = await blobToDataURL(ref.data); } } } } const blob = new Blob([JSON.stringify(stateForExport, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${slug(state.title || 'proyecto')}.json`; a.click(); URL.revokeObjectURL(a.href); } });
+      $('#import-json').onchange = async (e) => { const f = e.target.files?.[0]; if (!f) return; try { const txt = await f.text(); const data = JSON.parse(txt); if (!data || typeof data.title !== 'string' || !Array.isArray(data.scenes)) { throw new Error('Formato JSON inválido.'); } showDialog({ title: 'Importar Proyecto', message: 'Se han detectado datos de imágenes. La conversión puede tardar unos segundos. ¿Deseas continuar?', confirmText: 'Importar', onConfirm: async () => { for (const scene of data.scenes) { if (typeof scene.sketch === 'string' && scene.sketch.startsWith('data:image')) { scene.sketch = dataURLToBlob(scene.sketch); } if (scene.refs) { for (const ref of scene.refs) { if (typeof ref.data === 'string' && ref.data.startsWith('data:image')) { ref.data = dataURLToBlob(ref.data); } } } } state = data; state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); await persist(); render(); } }); } catch (err) { alert('Error al importar el archivo.\n\n' + err.message); } e.target.value = ''; };
+      $('#btn-export-pdf').onclick = () => showDialog({ title: 'Exportar a PDF', message: 'Se generará un archivo PDF de tu proyecto. El proceso puede ser lento si hay muchas imágenes.', confirmText: 'Generar PDF', onConfirm: async () => { const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: 'pt', format: 'a4' }); const MARGIN = 50; const pageW = doc.internal.pageSize.getWidth(); const pageH = doc.internal.pageSize.getHeight(); let y = MARGIN + 20; doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(`Autor: ${state.author}`, MARGIN, y); y += 20; } doc.setFontSize(10); doc.text(`Total de secuencias: ${state.scenes.length}`, MARGIN, y); y += 15; doc.text(`Generado el: ${new Date().toLocaleDateString()}`, MARGIN, y); y += 35; if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } for (let i = 0; i < state.scenes.length; i++) { doc.addPage(); const s = state.scenes[i]; y = MARGIN; if (s.statusColor) { const colorVar = getComputedStyle(document.documentElement).getPropertyValue(`--${s.statusColor}`).trim(); doc.setFillColor(colorVar); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(`SECUENCIA ${i + 1}: ${s.title || 'Sin título'}`, MARGIN, y); y += 30; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); if (s.location) { doc.text(`Localización: ${s.location}`, MARGIN, y); y += 15; } if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } if (s.tags && s.tags.length > 0) { const tagsText = `Etiquetas: ${s.tags.join(', ')}`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } if (s.sketch instanceof Blob) { const w = pageW - MARGIN * 2; const h = w * 9 / 16; if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; const sketchData = await blobToDataURL(s.sketch); doc.addImage(sketchData, 'PNG', MARGIN, y, w, h); y += h + 25; doc.setFont('helvetica', 'normal'); } if (s.refs && s.refs.length) { if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; let currentX = MARGIN; let currentY = y; for (let k = 0; k < imgs.length; k++) { const ref = imgs[k]; if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } const col = k % cols; currentX = MARGIN + col * (imgW + gap); if (ref.data instanceof Blob) { try { const refData = await blobToDataURL(ref.data); doc.addImage(refData, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } } if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } } y = currentY; } } doc.save(`${slug(state.title || 'proyecto')}.pdf`); } });
+      
+      function swap(arr, i, j) { const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+      function escapeHtml(s = '') { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+      function slug(s = '') { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/(^-|-$)/g, ''); }
+      function getXY(e, canvas) { const r = canvas.getBoundingClientRect(); const scaleX = canvas.width / r.width; const scaleY = canvas.height / r.height; return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY }; }
+      
+      await loadInitialState();
+      render();
+    });
+  </script>
+
+  <!-- Modales -->
+  <div id="custom-dialog-overlay" class="dialog-overlay" hidden>
+    <div class="dialog-box">
+      <h3 id="dialog-title"></h3>
+      <p id="dialog-message"></p>
+      <div class="dialog-actions">
+        <button id="dialog-btn-cancel" class="btn alt">Cancelar</button>
+        <button id="dialog-btn-confirm" class="btn primary">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="help-modal-overlay" class="help-modal-overlay" hidden>
+    <div class="help-modal-box">
+      <div class="help-modal-header">
+        <h2>Guía Completa de Uso</h2>
+        <span class="material-symbols-rounded help-modal-close" id="help-modal-close" title="Cerrar">&times;</span>
+      </div>
+      <div class="help-modal-content">
+        <h3>Gestión del Proyecto</h3>
+        <p>En la parte superior de la aplicación encontrarás los controles generales para todo tu proyecto.</p>
+        <h4>Datos Generales</h4>
+        <p>Puedes rellenar los campos <strong>Título del proyecto</strong>, <strong>Autor</strong> y <strong>Sinopsis</strong>. Esta información aparecerá en la portada de tus exportaciones a PDF y te ayudará a mantener organizada la idea principal de tu trabajo.</p>
+        <h4>Barra de Herramientas Principal</h4>
+        <ul>
+          <li><strong>Añadir nueva secuencia (+):</strong> Crea una nueva tarjeta de secuencia en blanco al final de tu proyecto.</li>
+          <li><strong>Exportar a PDF:</strong> Genera un documento PDF profesional con todo tu storyboard, listo para imprimir o compartir. Incluye una barra de color en cada página si has asignado un estado.</li>
+          <li><strong>Exportar a JSON:</strong> Guarda una copia de seguridad completa de tu proyecto en un archivo <code>.json</code>. Es la mejor forma de guardar tu trabajo o moverlo a otro ordenador.</li>
+          <li><strong>Importar desde JSON:</strong> Carga un proyecto previamente guardado desde un archivo <code>.json</code>.</li>
+          <li><strong>Vaciar proyecto:</strong> Elimina todo el contenido y empieza de cero. ¡Usa esta opción con cuidado!</li>
+        </ul>
+        
+        <h3>Trabajando con Secuencias</h3>
+        <p>Cada tarjeta representa una secuencia de tu proyecto. Puedes tener tantas como necesites.</p>
+        <h4>La Cabecera de la Secuencia</h4>
+        <p>En la parte superior de cada tarjeta de secuencia tienes varios controles:</p>
+        <ul>
+          <li><strong>Título de la secuencia:</strong> Haz clic y escribe directamente para cambiar el nombre de la secuencia.</li>
+          <li><strong>Punto de Estado:</strong> Es el círculo de color. Haz clic sobre él para cambiar su color y marcar el estado de la secuencia (p. ej., Rojo: pendiente, Naranja: en progreso, Verde: completada). El ciclo es Blanco -> Rojo -> Naranja -> Verde -> Blanco.</li>
+          <li><strong>Flechas (Arriba/Abajo):</strong> Reordena las secuencias para cambiar el orden narrativo.</li>
+          <li><strong>Duplicar:</strong> Crea una copia exacta de la secuencia actual justo debajo de ella.</li>
+          <li><strong>Eliminar:</strong> Borra la secuencia permanentemente.</li>
+        </ul>
+        
+        <h4>Detalles de la Secuencia</h4>
+        <p>Dentro de cada secuencia, puedes añadir información detallada:</p>
+        <ul>
+          <li><strong>Localización:</strong> Escribe el nombre del lugar. Junto al campo, verás un icono de enlace.
+            <ul>
+              <li><strong>Clic izquierdo:</strong> Si no hay enlace, te pedirá añadir uno. Si ya existe, lo abrirá en una nueva pestaña.</li>
+              <li><strong>Clic derecho:</strong> Te permitirá editar el enlace existente o eliminarlo (dejando el campo en blanco).</li>
+            </ul>
+          </li>
+          <li><strong>Etiquetas:</strong> Escribe una o varias etiquetas (separadas por comas) y pulsa <strong>Enter</strong> para añadirlas. Son útiles para filtrar u organizar (p. ej., "Interior", "Diálogo", "B-Roll"). Haz clic en la <strong>&times;</strong> para eliminar una etiqueta.</li>
+        </ul>
+
+        <h4>Pestañas de Contenido</h4>
+        <p>Cada secuencia tiene tres pestañas para organizar diferentes tipos de información:</p>
+        <ol>
+          <li><strong>Descripción Escenas:</strong> Un campo de texto libre para detallar las escenas que componen la secuencia. Describe los planos, diálogos, acciones, atrezo, notas de dirección o cualquier detalle técnico.</li>
+          <li><strong>Referencias:</strong> Sube imágenes que te sirvan de inspiración visual. Puedes eliminar una imagen haciendo clic en la <strong>&times;</strong> que aparece sobre ella.</li>
+          <li><strong>Storyboard:</strong> ¡El corazón de la herramienta! Un lienzo para que dibujes los planos clave de tu secuencia.
+            <ul>
+                <li>Usa la barra de herramientas para seleccionar un útil: <strong>Pincel</strong>, <strong>Línea</strong>, <strong>Círculo</strong>, <strong>Texto</strong> o <strong>Borrador</strong>.</li>
+                <li>Ajusta el <strong>Grosor</strong> del trazo o el tamaño del texto con el deslizador.</li>
+                <li>El botón <strong>Limpiar</strong> borra todo el dibujo del lienzo.</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
