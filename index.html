@@ -631,55 +631,37 @@
                 const { jsPDF } = self.jspdf;
                 const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
-                // --- Constants and Helpers ---
                 const MARGIN = 40;
                 const PAGE_W = doc.internal.pageSize.getWidth();
-                const PAGE_H = doc.internal.pageSize.getHeight();
                 const CONTENT_W = PAGE_W - MARGIN * 2;
-                let y = MARGIN;
-
                 const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
-
-                function checkPageBreak(requiredHeight) {
-                    if (y + requiredHeight > PAGE_H - MARGIN) {
-                        doc.addPage();
-                        y = MARGIN;
-                        return true;
-                    }
-                    return false;
-                }
 
                 // --- 1. Draw Title Page ---
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(24);
-                doc.text(state.title || 'Proyecto de Storyboard', PAGE_W / 2, y + 20, { align: 'center' });
-                y += 60;
+                doc.text(state.title || 'Proyecto de Storyboard', PAGE_W / 2, MARGIN + 20, { align: 'center' });
 
-                doc.setFont('helvetica', 'normal');
                 if (state.author) {
+                    doc.setFont('helvetica', 'normal');
                     doc.setFontSize(14);
-                    doc.text(\`Autor: \${state.author}\`, PAGE_W / 2, y, { align: 'center' });
-                    y += 20;
+                    doc.text(\`Por: \${state.author}\`, PAGE_W / 2, MARGIN + 50, { align: 'center' });
                 }
                 
                 if (state.synopsis) {
-                    doc.setFontSize(12);
                     doc.setFont('helvetica', 'bold');
-                    doc.text('Sinopsis', MARGIN, y);
-                    y += 20;
+                    doc.setFontSize(12);
+                    doc.text('Sinopsis', MARGIN, MARGIN + 90);
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(10);
                     const synopsisLines = doc.splitTextToSize(state.synopsis, CONTENT_W);
-                    doc.text(synopsisLines, MARGIN, y);
+                    doc.text(synopsisLines, MARGIN, MARGIN + 110);
                 }
 
-                // --- 2. Draw Scenes ---
+                // --- 2. Draw Each Scene on a New Page ---
                 for (let i = 0; i < state.scenes.length; i++) {
                     const scene = state.scenes[i];
-                    
-                    // Start each scene on a new page for simplicity and clarity
                     doc.addPage();
-                    y = MARGIN;
+                    let y = MARGIN;
 
                     // Scene Header
                     doc.setFont('helvetica', 'bold');
@@ -688,46 +670,38 @@
                     y += 30;
 
                     // Metadata
-                    if (scene.location || (scene.tags && scene.tags.length > 0)) {
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9);
-                        doc.setTextColor(100);
-                        if(scene.location) { doc.text(\`Localización: \${scene.location}\`, MARGIN, y); y += 15; }
-                        if(scene.tags && scene.tags.length > 0) { doc.text(\`Etiquetas: \${scene.tags.join(', ')}\`, MARGIN, y); y += 15; }
-                        y += 10;
-                    }
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(9);
+                    doc.setTextColor(100);
+                    if (scene.location) { doc.text(\`Localización: \${scene.location}\`, MARGIN, y); y += 15; }
+                    if (scene.tags && scene.tags.length > 0) { doc.text(\`Etiquetas: \${scene.tags.join(', ')}\`, MARGIN, y); y += 15; }
+                    y += 10;
                     
                     // Description
                     if (scene.description) {
-                        checkPageBreak(40);
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(12);
                         doc.setTextColor(0);
                         doc.text('Descripción', MARGIN, y);
                         y += 20;
-
                         doc.setFont('helvetica', 'normal');
                         doc.setFontSize(10);
                         const descLines = doc.splitTextToSize(scene.description, CONTENT_W);
-                        descLines.forEach(line => {
-                            checkPageBreak(12);
-                            doc.text(line, MARGIN, y);
-                            y += 12;
-                        });
-                        y += 20;
+                        doc.text(descLines, MARGIN, y);
+                        y += (descLines.length * 12) + 20;
                     }
 
                     // Storyboard Image
                     if (scene.sketch && typeof scene.sketch === 'string') {
-                        const imgHeight = CONTENT_W * 9 / 16;
-                        checkPageBreak(imgHeight + 40);
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(12);
                         doc.setTextColor(0);
                         doc.text('Storyboard', MARGIN, y);
                         y += 20;
+                        const imgHeight = CONTENT_W * 9 / 16;
                         try {
-                            doc.addImage(scene.sketch, 'PNG', MARGIN, y, CONTENT_W, imgHeight);
+                            // The Fix: Let jsPDF detect the format. Do NOT specify 'PNG'.
+                            doc.addImage(scene.sketch, MARGIN, y, CONTENT_W, imgHeight);
                             y += imgHeight + 20;
                         } catch (err) {
                             doc.text('Error: No se pudo añadir la imagen del storyboard.', MARGIN, y);
@@ -738,21 +712,18 @@
                     // Reference Images
                     const refs = scene.refs.filter(r => r.data && typeof r.data === 'string');
                     if (refs.length > 0) {
-                        checkPageBreak(40);
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(12);
                         doc.setTextColor(0);
                         doc.text('Referencias', MARGIN, y);
                         y += 20;
-
-                        const imgWidth = CONTENT_W / 2 - 5;
+                        const imgWidth = (CONTENT_W / 2) - 5;
                         const imgHeight = imgWidth * 9 / 16;
-
                         for (let j = 0; j < refs.length; j++) {
-                            checkPageBreak(imgHeight + 10);
                             const x = MARGIN + (j % 2) * (imgWidth + 10);
                             try {
-                                doc.addImage(refs[j].data, 'JPEG', x, y, imgWidth, imgHeight);
+                                // The Fix: Let jsPDF detect the format. Do NOT specify 'JPEG'.
+                                doc.addImage(refs[j].data, x, y, imgWidth, imgHeight);
                             } catch(err) {
                                 doc.text('Error img.', x, y);
                             }
@@ -768,19 +739,17 @@
                 self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
 
             } catch (error) {
-                // If anything fails, send an error message back to the main thread
-                self.postMessage({ error: error.message });
+                self.postMessage({ error: error.message + ' Stack: ' + error.stack });
             }
         };
       `;
       // ---------- END: NEW PDF WORKER SCRIPT ----------
 
 
-      // Worker for ZIP export, remains unchanged as it was correct.
       const zipWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
         self.onmessage = async (e) => {
-          const { state } = e.data; // state arrives with Blobs intact
+          const { state } = e.data;
           const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
           
           const zip = new JSZip();
@@ -828,10 +797,9 @@
         const worker = createWorker(workerScript);
 
         worker.onmessage = (e) => {
-            // Check if the worker sent back an error message
             if (e.data.error) {
-                console.error('Error desde el Web Worker PDF:', e.data.error);
-                alert('Ocurrió un error al generar el PDF. Revisa la consola para más detalles.');
+                console.error('Error desde el Web Worker:', e.data.error);
+                alert('Ocurrió un error al generar el archivo. Revisa la consola para más detalles.');
             } else {
                 const { blob, filename } = e.data;
                 const a = document.createElement('a');
@@ -840,7 +808,6 @@
                 a.click();
                 URL.revokeObjectURL(a.href);
             }
-            // Always clean up
             button.classList.remove('loading');
             button.disabled = false;
             worker.terminate();
