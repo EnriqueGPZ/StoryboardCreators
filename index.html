@@ -41,35 +41,6 @@
         },
         "description": "Una herramienta online y gratuita para crear storyboards detallados, planificar secuencias, añadir notas, referencias visuales y exportar a PDF y ZIP. Diseñada para creadores de contenido, cineastas y educadores.",
         "url": "https://[TU-URL-AQUI.com]/final.html"
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "¿Es esta herramienta realmente gratuita?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sí, 'Storyboard for Creators' es completamente gratuita. No hay funciones de pago ni suscripciones. Todos los datos se guardan localmente en tu propio navegador."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Dónde se guardan mis datos?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Tus proyectos se guardan de forma segura en el almacenamiento de tu navegador (usando IndexedDB). Esto significa que son privados y solo accesibles desde el dispositivo y navegador que utilizas. Nadie más puede verlos."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Puedo usar mis proyectos en otro ordenador?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sí. Puedes usar la función 'Exportar a ZIP' para guardar una copia de seguridad de tu proyecto como un archivo .zip. Este archivo contiene tus datos y todas las imágenes. Luego, en otro ordenador, puedes usar 'Importar desde ZIP' para cargar y continuar trabajando en tu proyecto."
-            }
-          }
-        ]
       }
     ]
   }
@@ -89,7 +60,6 @@
       --canvas-bg: #f5f5f7;
       --bg-alt: #f5f5f7; 
     }
-    /* --- NUEVO: ESTILOS PARA MODO OSCURO --- */
     body.dark-theme {
       --bg: #1c1c1e;
       --surface: #2c2c2e;
@@ -202,7 +172,10 @@
     .controls .btn.active{background-color:var(--acc);color:#fff;border-color:var(--acc);}
     body.dark-theme .controls .btn.red{border:1px solid var(--red); color: var(--red);}
     body.dark-theme .controls .btn.red:hover{background-color:rgba(255,69,58,0.1);}
-
+    .color-picker { padding: 0; border: none; width: 28px; height: 28px; cursor: pointer; background: transparent; vertical-align: middle; margin-left: auto; }
+    .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-picker::-webkit-color-swatch { border-radius: 50%; border: 2px solid var(--line); }
+    .color-picker::-moz-color-swatch { border-radius: 50%; border: 2px solid var(--line); }
 
     .grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
     @media (max-width: 500px){.grid-layout{grid-template-columns:1fr;}}
@@ -216,6 +189,9 @@
     .dialog-actions .btn{padding:8px 16px;border-radius:8px;}
     .dialog-actions .btn.primary{background-color:var(--acc);color:#fff;}
     
+    #format-dialog-box .dialog-actions { justify-content: center; }
+    #format-dialog-box .btn { flex-grow: 1; }
+
     .location-wrapper { position: relative; }
     .btn-location-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; color: var(--muted); border-radius: 50%; }
     .btn-location-link:hover { background-color: transparent; color: var(--txt); }
@@ -245,15 +221,10 @@
     .help-modal-content strong { color: var(--txt); font-weight: 500; }
     .help-modal-content code { background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
   
-    /* --- NUEVO: ESTILOS PARA EL SPINNER DE CARGA --- */
     .spinner {
-        display: inline-block;
-        width: 22px;
-        height: 22px;
-        border: 2px solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spin .75s linear infinite;
+        display: inline-block; width: 22px; height: 22px;
+        border: 2px solid currentColor; border-right-color: transparent;
+        border-radius: 50%; animation: spin .75s linear infinite;
     }
     .btn .spinner { display: none; }
     .btn.loading .spinner { display: inline-block; }
@@ -282,7 +253,7 @@
       <h2>Características Principales</h2>
       <div class="features-grid">
         <div class="feature-item"><span class="material-symbols-rounded">layers</span><h3>Planificación por Secuencias</h3><p>Organiza tu guion en secuencias. Cada secuencia puede contener una o varias escenas detalladas en su descripción.</p></div>
-        <div class="feature-item"><span class="material-symbols-rounded">draw</span><h3>Storyboard Integrado</h3><p>Dibuja tus planos directamente en la aplicación con nuestro lienzo digital. Una forma visual y rápida de plasmar tus ideas.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">palette</span><h3>Dibujo Avanzado</h3><p>Usa herramientas como flechas, rectángulos y un selector de color para crear storyboards más detallados y expresivos.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">dark_mode</span><h3>Modo Oscuro</h3><p>Trabaja cómodamente en cualquier condición de luz con el nuevo tema oscuro, que cuida tu vista y tu concentración.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">archive</span><h3>Exportación ZIP</h3><p>Guarda todo tu proyecto, datos e imágenes, en un único y práctico archivo .zip para copias de seguridad o para moverlo a otro equipo.</p></div>
       </div>
@@ -296,7 +267,6 @@
           <button class="btn alt" id="btn-export-zip" title="Exportar a ZIP"><span class="material-symbols-rounded">archive</span><span class="spinner"></span></button>
           <label class="btn alt" title="Importar desde ZIP"><span class="material-symbols-rounded">unarchive</span><input id="import-zip" type="file" accept="application/zip" hidden /></label>
           <button class="btn red" id="btn-clear" title="Vaciar proyecto"><span class="material-symbols-rounded">delete_sweep</span></button>
-          <!-- NUEVO BOTÓN PARA MODO OSCURO -->
           <button class="btn alt" id="btn-theme-toggle" title="Cambiar tema"><span class="material-symbols-rounded">dark_mode</span></button>
           <button class="btn alt" id="btn-help" title="Ayuda"><span class="material-symbols-rounded">help</span></button>
         </div>
@@ -331,12 +301,16 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const $ = (sel, p = document) => p.querySelector(sel);
+      const $$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
+      const uid = () => Math.random().toString(36).slice(2);
       
-      // --- LÓGICA DE MODO OSCURO ---
       const themeToggle = $('#btn-theme-toggle');
       const themeIcon = $('span', themeToggle);
       
       const applyTheme = (theme) => {
+        const oldDefault = theme === 'dark' ? '#000000' : '#ffffff';
+        const newDefault = theme === 'dark' ? '#ffffff' : '#000000';
+        
         if (theme === 'dark') {
           document.body.classList.add('dark-theme');
           themeIcon.textContent = 'light_mode';
@@ -346,6 +320,12 @@
           themeIcon.textContent = 'dark_mode';
           themeToggle.title = 'Cambiar a tema oscuro';
         }
+        
+        $$('.color-picker').forEach(picker => {
+          if (picker.value.toLowerCase() === oldDefault) {
+            picker.value = newDefault;
+          }
+        });
       };
 
       let currentTheme = localStorage.getItem('storyboard-theme') || 'light';
@@ -356,9 +336,6 @@
         localStorage.setItem('storyboard-theme', currentTheme);
         applyTheme(currentTheme);
       };
-
-      const $$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
-      const uid = () => Math.random().toString(36).slice(2);
       
       const defaultScene = () => ({ id: uid(), title: 'Nueva secuencia', location: '', locationURL: null, description: '', tags: [], sketch: null, refs: [], statusColor: null });
       
@@ -385,12 +362,11 @@
       }
       
       function renderScene(scene, index) {
-        // ... (El código de renderScene no cambia, lo omito por brevedad, pero debe estar aquí)
         const el = document.createElement('div');
         el.className = 'scene';
         el.dataset.id = scene.id;
         
-        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia: planos, diálogos, acciones, audio, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <button class="btn red clear" style="margin-left: auto;">Limpiar</button> </div> </div> </div>`;
+        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia: planos, diálogos, acciones, audio, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
         
         const updateAndRender = async () => { await persist(); render(); };
         const update = async () => { await persist(); };
@@ -407,6 +383,11 @@
         $('.dup', el).onclick = () => { const clone = JSON.parse(JSON.stringify(scene)); clone.id = uid(); state.scenes.splice(index + 1, 0, clone); updateAndRender(); };
         $('.del', el).onclick = () => showDialog({ title: 'Eliminar Secuencia', message: '¿Seguro que quieres eliminar esta secuencia? Esta acción no se puede deshacer.', confirmText: 'Sí, eliminar', onConfirm: () => { state.scenes.splice(index, 1); if (!state.scenes.length) state.scenes.push(defaultScene()); updateAndRender(); } });
         
+        $('.download-sb', el).onclick = () => {
+          if (!scene.sketch) { alert('No hay nada en el storyboard para descargar.'); return; }
+          showExportFormatDialog(scene, index);
+        };
+
         const statusDot = $('.status-dot', el);
         const colorCycle = [null, 'red', 'orange', 'green'];
         if (scene.statusColor) { statusDot.classList.add(scene.statusColor); }
@@ -447,33 +428,85 @@
         const ctx = canvas.getContext('2d');
         const controls = $('.controls', el);
         const sizeInput = $('.size', el);
+        const colorPicker = $('.color-picker', el);
+        colorPicker.value = document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000';
         if (scene.sketch instanceof Blob) loadImageToCanvas(scene.sketch, canvas, ctx);
         
         let activeTool = 'draw', isDrawing = false, startPos = null, lastPos = null, savedCanvasState = null;
         const getPos = (e) => getXY(e, canvas);
+        
         const drawFinalShape = (start, end) => {
-            ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = document.body.classList.contains('dark-theme') ? '#FFFFFF' : '#000000'; ctx.globalCompositeOperation = 'source-over'; ctx.beginPath();
-            if (activeTool === 'line') { ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); } 
-            else if (activeTool === 'circle') { const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)); ctx.arc(start.x, start.y, radius, 0, Math.PI * 2); }
+            const color = colorPicker.value;
+            const lineWidth = +sizeInput.value;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.globalCompositeOperation = 'source-over';
+            
+            ctx.beginPath();
+            if (activeTool === 'line') {
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+            } else if (activeTool === 'rectangle') {
+                ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
+            } else if (activeTool === 'circle') {
+                const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+                ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
+            } else if (activeTool === 'arrow') {
+                const headLength = 10 + lineWidth;
+                const angle = Math.atan2(end.y - start.y, end.x - start.x);
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.moveTo(end.x, end.y);
+                ctx.lineTo(end.x - headLength * Math.cos(angle - Math.PI / 6), end.y - headLength * Math.sin(angle - Math.PI / 6));
+                ctx.moveTo(end.x, end.y);
+                ctx.lineTo(end.x - headLength * Math.cos(angle + Math.PI / 6), end.y - headLength * Math.sin(angle + Math.PI / 6));
+            }
             ctx.stroke();
         };
+
         const startDrawing = (e) => {
           e.preventDefault(); const posEvent = e.touches ? e.touches[0] : e;
-          const drawColor = document.body.classList.contains('dark-theme') ? '#FFFFFF' : '#000000';
-          if (activeTool === 'text') { const text = prompt('Escribe el texto que quieres añadir:', ''); if (text) { const pos = getPos(posEvent); ctx.font = `${+sizeInput.value * 3}px Roboto`; ctx.fillStyle = drawColor; ctx.globalCompositeOperation = 'source-over'; ctx.fillText(text, pos.x, pos.y); (async () => { scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content'); })(); } return; }
+          if (activeTool === 'text') { 
+            const text = prompt('Escribe el texto que quieres añadir:', ''); 
+            if (text) { 
+              const pos = getPos(posEvent); 
+              ctx.font = `${+sizeInput.value * 3}px Roboto`; 
+              ctx.fillStyle = colorPicker.value;
+              ctx.globalCompositeOperation = 'source-over'; 
+              ctx.fillText(text, pos.x, pos.y); 
+              (async () => { scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content'); })(); 
+            } 
+            return; 
+          }
           isDrawing = true; startPos = getPos(posEvent); lastPos = startPos;
-          if (activeTool === 'line' || activeTool === 'circle') { savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height); }
+          if (['line', 'rectangle', 'circle', 'arrow'].includes(activeTool)) {
+            savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          }
         };
         const draw = (e) => {
           if (!isDrawing) return; e.preventDefault(); const posEvent = e.touches ? e.touches[0] : e; const currentPos = getPos(posEvent);
-          const drawColor = document.body.classList.contains('dark-theme') ? '#FFFFFF' : '#000000';
-          if (activeTool === 'draw' || activeTool === 'erase') { ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = drawColor; ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over'; ctx.beginPath(); ctx.moveTo(lastPos.x, lastPos.y); ctx.lineTo(currentPos.x, currentPos.y); ctx.stroke(); lastPos = currentPos; } 
-          else if (savedCanvasState) { ctx.putImageData(savedCanvasState, 0, 0); drawFinalShape(startPos, currentPos); }
+          if (activeTool === 'draw' || activeTool === 'erase') { 
+            ctx.lineWidth = +sizeInput.value; 
+            ctx.lineCap = 'round'; 
+            ctx.strokeStyle = colorPicker.value;
+            ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over'; 
+            ctx.beginPath(); ctx.moveTo(lastPos.x, lastPos.y); ctx.lineTo(currentPos.x, currentPos.y); ctx.stroke(); 
+            lastPos = currentPos; 
+          } else if (savedCanvasState) { 
+            ctx.putImageData(savedCanvasState, 0, 0); 
+            drawFinalShape(startPos, currentPos); 
+          }
         };
         const endDrawing = async (e) => {
             if (!isDrawing) return; e.preventDefault(); const posEvent = e.changedTouches ? e.changedTouches[0] : e;
-            if ((activeTool === 'line' || activeTool === 'circle') && savedCanvasState) { ctx.putImageData(savedCanvasState, 0, 0); drawFinalShape(startPos, getPos(posEvent)); }
-            isDrawing = false; savedCanvasState = null; scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
+            if (savedCanvasState) {
+                ctx.putImageData(savedCanvasState, 0, 0);
+                drawFinalShape(startPos, getPos(posEvent));
+            }
+            isDrawing = false; savedCanvasState = null; 
+            scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
         };
 
         canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', endDrawing); canvas.addEventListener('mouseleave', endDrawing);
@@ -492,6 +525,50 @@
       dialog.btnCancel.onclick = hideDialog;
       dialog.overlay.onclick = (e) => { if (e.target === dialog.overlay) hideDialog(); };
 
+      const formatDialog = { overlay: $('#format-dialog-overlay'), btnPng: $('#format-btn-png'), btnJpg: $('#format-btn-jpg') };
+      function showExportFormatDialog(scene, index) {
+        formatDialog.overlay.hidden = false;
+        const exportAndHide = (format) => {
+          exportStoryboardImage(scene, index, format);
+          formatDialog.overlay.hidden = true;
+        };
+        formatDialog.btnPng.onclick = () => exportAndHide('png');
+        formatDialog.btnJpg.onclick = () => exportAndHide('jpeg');
+        formatDialog.overlay.onclick = (e) => { if(e.target === formatDialog.overlay) formatDialog.overlay.hidden = true; };
+      }
+      
+      function exportStoryboardImage(scene, index, format = 'png') {
+        if (!(scene.sketch instanceof Blob)) return;
+        const mimeType = `image/${format}`;
+        const extension = format;
+        const quality = 0.9;
+        
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        const img = new Image();
+
+        img.onload = () => {
+          tempCanvas.width = img.width;
+          tempCanvas.height = img.height;
+          
+          const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
+          tempCtx.fillStyle = bgColor;
+          tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          tempCtx.drawImage(img, 0, 0);
+
+          tempCanvas.toBlob(blob => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `storyboard-${slug(scene.title || `secuencia-${index+1}`)}.${extension}`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+          }, mimeType, quality);
+
+          URL.revokeObjectURL(img.src);
+        };
+        img.src = URL.createObjectURL(scene.sketch);
+      }
+
       const helpModal = { overlay: $('#help-modal-overlay'), btnOpen: $('#btn-help'), btnClose: $('#help-modal-close') };
       helpModal.btnOpen.onclick = () => { helpModal.overlay.hidden = false; };
       helpModal.btnClose.onclick = () => { helpModal.overlay.hidden = true; };
@@ -505,35 +582,19 @@
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Mi Nuevo Proyecto'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
-      // --- LÓGICA DE WEB WORKERS ---
       const zipWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
         self.onmessage = async (e) => {
           const { state } = e.data;
           const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
-          
-          const zip = new JSZip();
-          const assetsFolder = zip.folder("assets");
-          const stateForExport = JSON.parse(JSON.stringify(state));
-
+          const zip = new JSZip(); const assetsFolder = zip.folder("assets"); const stateForExport = JSON.parse(JSON.stringify(state));
           for (let i = 0; i < state.scenes.length; i++) {
-              const scene = state.scenes[i];
-              const exportScene = stateForExport.scenes[i];
-              if (scene.sketch instanceof Blob) {
-                  const filename = \`sketch-\${scene.id}.png\`;
-                  assetsFolder.file(filename, scene.sketch);
-                  exportScene.sketch = \`assets/\${filename}\`;
-              }
+              const scene = state.scenes[i]; const exportScene = stateForExport.scenes[i];
+              if (scene.sketch instanceof Blob) { const filename = \`sketch-\${scene.id}.png\`; assetsFolder.file(filename, scene.sketch); exportScene.sketch = \`assets/\${filename}\`; }
               if (scene.refs && scene.refs.length) {
                   for (let j = 0; j < scene.refs.length; j++) {
-                      const ref = scene.refs[j];
-                      const exportRef = exportScene.refs[j];
-                      if (ref.data instanceof Blob) {
-                          const extension = ref.data.type.split('/')[1] || 'png';
-                          const filename = \`ref-\${scene.id}-\${ref.id}.\${extension}\`;
-                          assetsFolder.file(filename, ref.data);
-                          exportRef.data = \`assets/\${filename}\`;
-                      }
+                      const ref = scene.refs[j]; const exportRef = exportScene.refs[j];
+                      if (ref.data instanceof Blob) { const extension = ref.data.type.split('/')[1] || 'png'; const filename = \`ref-\${scene.id}-\${ref.id}.\${extension}\`; assetsFolder.file(filename, ref.data); exportRef.data = \`assets/\${filename}\`; }
                   }
               }
           }
@@ -542,54 +603,34 @@
           self.postMessage({ blob: zipBlob, filename: \`\${slug(state.title || 'proyecto')}.zip\` });
         };
       `;
-
       const pdfWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
         const blobToDataURL = (blob) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
-        
         self.onmessage = async (e) => {
             const { state } = e.data;
             const { jsPDF } = self.jspdf;
             const doc = new jsPDF({ unit: 'pt', format: 'a4' });
             const MARGIN = 50; const pageW = doc.internal.pageSize.getWidth(); const pageH = doc.internal.pageSize.getHeight(); let y = MARGIN + 20;
             const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
-            
-            // --- Logic from btn-export-pdf ---
             doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(\`Autor: \${state.author}\`, MARGIN, y); y += 20; } doc.setFontSize(10); doc.text(\`Total de secuencias: \${state.scenes.length}\`, MARGIN, y); y += 15; doc.text(\`Generado el: \${new Date().toLocaleDateString()}\`, MARGIN, y); y += 35; if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } for (let i = 0; i < state.scenes.length; i++) { doc.addPage(); const s = state.scenes[i]; y = MARGIN; if (s.statusColor) { const colorMap = {red:'#d70015',orange:'#ff9500',green:'#34c759'}; doc.setFillColor(colorMap[s.statusColor]); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(\`SECUENCIA \${i + 1}: \${s.title || 'Sin título'}\`, MARGIN, y); y += 30; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); if (s.location) { doc.text(\`Localización: \${s.location}\`, MARGIN, y); y += 15; } if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } if (s.tags && s.tags.length > 0) { const tagsText = \`Etiquetas: \${s.tags.join(', ')}\`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } if (s.sketch instanceof Blob) { const w = pageW - MARGIN * 2; const h = w * 9 / 16; if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; const sketchData = await blobToDataURL(s.sketch); doc.addImage(sketchData, 'PNG', MARGIN, y, w, h); y += h + 25; doc.setFont('helvetica', 'normal'); } if (s.refs && s.refs.length) { if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; let currentX = MARGIN; let currentY = y; for (let k = 0; k < imgs.length; k++) { const ref = imgs[k]; if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } const col = k % cols; currentX = MARGIN + col * (imgW + gap); if (ref.data instanceof Blob) { try { const refData = await blobToDataURL(ref.data); doc.addImage(refData, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } } if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } } y = currentY; } }
-            // --- End Logic ---
             const pdfBlob = doc.output('blob');
             self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
         };
       `;
       
-      function createWorker(scriptContent) {
-          const blob = new Blob([scriptContent], { type: 'application/javascript' });
-          return new Worker(URL.createObjectURL(blob));
-      }
-
+      function createWorker(scriptContent) { const blob = new Blob([scriptContent], { type: 'application/javascript' }); return new Worker(URL.createObjectURL(blob)); }
       function handleExportWithWorker(button, workerScript) {
         if (button.classList.contains('loading')) return;
-        button.classList.add('loading');
-        button.disabled = true;
-
+        button.classList.add('loading'); button.disabled = true;
         const worker = createWorker(workerScript);
         worker.onmessage = (e) => {
             const { blob, filename } = e.data;
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(a.href);
-            button.classList.remove('loading');
-            button.disabled = false;
-            worker.terminate();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+            URL.revokeObjectURL(a.href); button.classList.remove('loading'); button.disabled = false; worker.terminate();
         };
         worker.onerror = (e) => {
-            console.error('Error en el Web Worker:', e);
-            alert('Ocurrió un error al generar el archivo.');
-            button.classList.remove('loading');
-            button.disabled = false;
-            worker.terminate();
+            console.error('Error en el Web Worker:', e); alert('Ocurrió un error al generar el archivo.');
+            button.classList.remove('loading'); button.disabled = false; worker.terminate();
         };
         worker.postMessage({ state: JSON.parse(JSON.stringify(state)) });
       }
@@ -598,19 +639,14 @@
       $('#btn-export-pdf').onclick = () => handleExportWithWorker($('#btn-export-pdf'), pdfWorkerScript);
 
       $('#import-zip').onchange = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        showDialog({
-            title: 'Importar Proyecto desde ZIP',
-            message: 'Esto reemplazará tu proyecto actual. ¿Estás seguro?',
-            confirmText: 'Sí, importar',
+        const file = e.target.files?.[0]; if (!file) return;
+        showDialog({ title: 'Importar Proyecto desde ZIP', message: 'Esto reemplazará tu proyecto actual. ¿Estás seguro?', confirmText: 'Sí, importar',
             onConfirm: async () => {
                 try {
                     const zip = await JSZip.loadAsync(file);
                     const projectFile = zip.file("project.json");
                     if (!projectFile) throw new Error("El archivo project.json no se encontró en el ZIP.");
-                    const jsonText = await projectFile.async("string");
-                    const data = JSON.parse(jsonText);
+                    const jsonText = await projectFile.async("string"); const data = JSON.parse(jsonText);
                     const loadingPromises = [];
                     for (const scene of data.scenes) {
                         if (typeof scene.sketch === 'string' && scene.sketch.startsWith('assets/')) {
@@ -629,8 +665,7 @@
                     await Promise.all(loadingPromises);
                     state = data;
                     state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; });
-                    await persist();
-                    render();
+                    await persist(); render();
                 } catch (err) { alert('Error al importar el archivo ZIP.\n\n' + err.message); } 
                 finally { e.target.value = ''; }
             }
@@ -659,6 +694,17 @@
     </div>
   </div>
 
+  <div id="format-dialog-overlay" class="dialog-overlay" hidden>
+    <div id="format-dialog-box" class="dialog-box">
+      <h3>Seleccionar Formato</h3>
+      <p>Elige el formato en el que quieres descargar la imagen del storyboard.</p>
+      <div class="dialog-actions">
+        <button id="format-btn-png" class="btn alt">PNG (Alta Calidad)</button>
+        <button id="format-btn-jpg" class="btn primary">JPEG (Archivo Pequeño)</button>
+      </div>
+    </div>
+  </div>
+
   <div id="help-modal-overlay" class="help-modal-overlay" hidden>
     <div class="help-modal-box">
       <div class="help-modal-header">
@@ -668,26 +714,18 @@
       <div class="help-modal-content">
         <h3>Gestión del Proyecto</h3>
         <p>En la parte superior de la aplicación encontrarás los controles generales para todo tu proyecto.</p>
-        <h4>Barra de Herramientas Principal</h4>
-        <ul>
-            <li><strong>Añadir nueva secuencia (+):</strong> Crea una nueva tarjeta de secuencia en blanco al final de tu proyecto.</li>
-            <li><strong>Exportar a PDF:</strong> Genera un documento PDF profesional con todo tu storyboard. La generación se hace en segundo plano para no bloquear la aplicación.</li>
-            <li><strong>Exportar a ZIP:</strong> Guarda una copia de seguridad completa de tu proyecto (datos e imágenes) en un archivo <code>.zip</code>.</li>
-            <li><strong>Importar desde ZIP:</strong> Carga un proyecto previamente guardado desde un archivo <code>.zip</code>.</li>
-            <li><strong>Vaciar proyecto:</strong> Elimina todo el contenido y empieza de cero. ¡Usa esta opción con cuidado!</li>
-            <li><strong>Cambiar Tema (icono sol/luna):</strong> Alterna entre el modo claro y oscuro para tu comodidad visual.</li>
-        </ul>
         
         <h3>Trabajando con Secuencias</h3>
-        <p>Cada tarjeta representa una secuencia de tu proyecto. Puedes tener tantas como necesites.</p>
-        <h4>El Lienzo de Storyboard</h4>
-        <p>¡El corazón de la herramienta! Un lienzo para que dibujes los planos clave de tu secuencia.</p>
-        <ul>
-            <li>El color del pincel y del texto se adaptará automáticamente al tema claro/oscuro que estés usando.</li>
-            <li>Usa la barra de herramientas para seleccionar un útil: <strong>Pincel</strong>, <strong>Línea</strong>, <strong>Círculo</strong>, <strong>Texto</strong> o <strong>Borrador</strong>.</li>
-            <li>Ajusta el <strong>Grosor</strong> del trazo o el tamaño del texto con el deslizador.</li>
-            <li>El botón <strong>Limpiar</strong> borra todo el dibujo del lienzo.</li>
-        </ul>
+        <p>Cada tarjeta representa una secuencia de tu proyecto. En la cabecera de cada una, ahora tienes un nuevo botón para <strong>descargar la imagen del storyboard</strong> de esa secuencia.</p>
+
+        <h4>Pestañas de Contenido</h4>
+        <p>La pestaña de <strong>Storyboard</strong> ahora es mucho más potente:</p>
+        <ol>
+          <li><strong>Nuevas Herramientas:</strong> Además del pincel, línea, círculo y texto, ahora puedes dibujar <strong>rectángulos</strong> y <strong>flechas</strong>.</li>
+          <li><strong>Selector de Color:</strong> A la derecha de la barra de herramientas del lienzo, encontrarás un círculo de color. Haz clic en él para elegir cualquier color para tus herramientas de dibujo.</li>
+          <li><strong>Exportación Individual:</strong> Al descargar un storyboard, podrás elegir entre <strong>PNG</strong> (calidad máxima) o <strong>JPEG</strong> (tamaño reducido). La imagen se exportará con el fondo del tema que estés usando.</li>
+          <li><strong>Tema Inteligente:</strong> El color de dibujo por defecto se ajustará automáticamente si cambias entre el modo claro y oscuro, pero respetará cualquier color personalizado que hayas elegido.</li>
+        </ol>
       </div>
     </div>
   </div>
