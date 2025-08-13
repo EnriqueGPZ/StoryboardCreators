@@ -398,9 +398,7 @@
         el.className = 'scene';
         el.dataset.id = scene.id;
         
-        // --- START: HTML Template Update ---
         el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia, el corazón de tu escaleta. Describe planos, diálogos, acciones, atrezo, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn alt btn-add-to-refs" title="Añadir a Referencias" style="margin-left: 8px;"><span class="material-symbols-rounded">add_photo_alternate</span></button> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
-        // --- END: HTML Template Update ---
         
         const updateAndRender = async () => { await persist(); render(); };
         const update = async () => { await persist(); };
@@ -556,7 +554,6 @@
         $$('.btn[data-tool]', controls).forEach(btn => { btn.onclick = () => { activeTool = btn.dataset.tool; $$('.btn[data-tool]', controls).forEach(b => b.classList.remove('active')); btn.classList.add('active'); }; });
         $('.clear', controls).onclick = async () => { ctx.clearRect(0, 0, canvas.width, canvas.height); scene.sketch = null; await update(); $('.tab[data-tab="storyboard"]', el).classList.remove('has-content'); };
         
-        // --- START: New Button Logic ---
         $('.btn-add-to-refs', el).onclick = async () => {
           if (!scene.sketch) {
             alert('El storyboard está vacío. Dibuja algo antes de añadirlo a las referencias.');
@@ -572,8 +569,7 @@
           scene.refs.push(newRef);
           await updateAndRender();
         };
-        // --- END: New Button Logic ---
-
+        
         return el;
       }
       
@@ -655,7 +651,6 @@
                 const CONTENT_W = PAGE_W - MARGIN * 2;
                 const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
 
-                // --- 1. Draw Title Page ---
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(24);
                 doc.text(state.title || 'Proyecto de Storyboard', PAGE_W / 2, MARGIN + 20, { align: 'center' });
@@ -676,19 +671,16 @@
                     doc.text(synopsisLines, MARGIN, MARGIN + 110);
                 }
 
-                // --- 2. Draw Each Scene on a New Page ---
                 for (let i = 0; i < state.scenes.length; i++) {
                     const scene = state.scenes[i];
                     doc.addPage();
                     let y = MARGIN;
 
-                    // Scene Header
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(16);
                     doc.text(\`SECUENCIA \${i + 1}: \${scene.title || 'Sin título'}\`, MARGIN, y);
                     y += 30;
 
-                    // Metadata
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(9);
                     doc.setTextColor(100);
@@ -696,7 +688,6 @@
                     if (scene.tags && scene.tags.length > 0) { doc.text(\`Etiquetas: \${scene.tags.join(', ')}\`, MARGIN, y); y += 15; }
                     y += 10;
                     
-                    // Description
                     if (scene.description) {
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(12);
@@ -710,7 +701,6 @@
                         y += (descLines.length * 12) + 20;
                     }
 
-                    // Storyboard Image
                     if (scene.sketch && typeof scene.sketch === 'string') {
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(12);
@@ -727,7 +717,6 @@
                         }
                     }
 
-                    // Reference Images
                     const refs = scene.refs.filter(r => r.data && typeof r.data === 'string');
                     if (refs.length > 0) {
                         doc.setFont('helvetica', 'bold');
@@ -751,7 +740,6 @@
                     }
                 }
 
-                // --- 3. Finalize and Send ---
                 const pdfBlob = doc.output('blob');
                 self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
 
@@ -809,6 +797,15 @@
         button.classList.add('loading');
         button.disabled = true;
 
+        // <-- LA SOLUCIÓN DEFINITIVA: Leer siempre desde la base de datos antes de exportar.
+        const stateFromDB = await db.project.get(PROJECT_ID);
+        if (!stateFromDB) {
+            alert("No hay proyecto guardado para exportar.");
+            button.classList.remove('loading');
+            button.disabled = false;
+            return;
+        }
+        
         const worker = createWorker(workerScript);
 
         worker.onmessage = (e) => {
@@ -835,13 +832,15 @@
             button.disabled = false;
             worker.terminate();
         };
+        
+        const stateToExport = stateFromDB; // Usamos el estado leído de la DB
 
         if (workerScript === pdfWorkerScript) {
-            const stateForExport = JSON.parse(JSON.stringify(state));
+            const stateForExport = JSON.parse(JSON.stringify(stateToExport));
             const conversionPromises = [];
 
-            for (let i = 0; i < state.scenes.length; i++) {
-                const originalScene = state.scenes[i];
+            for (let i = 0; i < stateToExport.scenes.length; i++) {
+                const originalScene = stateToExport.scenes[i];
                 if (originalScene.sketch instanceof Blob) {
                     conversionPromises.push(
                         blobToDataURL(originalScene.sketch).then(dataUrl => { stateForExport.scenes[i].sketch = dataUrl; })
@@ -861,7 +860,7 @@
             await Promise.all(conversionPromises);
             worker.postMessage({ state: stateForExport });
         } else {
-            worker.postMessage({ state });
+            worker.postMessage({ state: stateToExport });
         }
       }
 
