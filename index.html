@@ -4,18 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
-  <title>Storyboard for Creators - Herramienta Online y Gratuita</title>
+  <title>Storyboard y Escaleta para Creators - Herramienta Online y Gratuita</title>
   
-  <meta name="description" content="Crea storyboards profesionales para tus vídeos de YouTube, cursos o proyectos creativos. Herramienta online, gratuita y fácil de usar. Planifica tus secuencias, notas y referencias visuales en un solo lugar.">
-  <meta name="keywords" content="storyboard online, creador de storyboard, herramienta para youtubers, planificador de vídeo, guion gráfico, storyboard gratis, video planner, storyboard creator">
+  <meta name="description" content="Crea storyboards y escaletas profesionales para tus vídeos de YouTube, cursos o proyectos creativos. Herramienta online, gratuita y fácil de usar. Planifica tus secuencias, notas y referencias visuales en un solo lugar.">
+  <meta name="keywords" content="storyboard online, creador de storyboard, escaleta, creador de escaleta, escaleta para video, escaleta audiovisual, herramienta para youtubers, planificador de vídeo, guion gráfico, storyboard gratis, video planner, storyboard creator">
   <meta name="author" content="Storyboard for Creators">
   <link rel="canonical" href="https://[TU-URL-AQUI.com]/final.html" />
 
-  <meta property="og:title" content="Storyboard for Creators - Herramienta Online Gratuita" />
+  <meta property="og:title" content="Storyboard y Escaleta para Creators - Herramienta Online Gratuita" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://[TU-URL-AQUI.com]/final.html" />
   <meta property="og:image" content="https://[URL-A-UNA-IMAGEN-PREVIEW.png]" />
-  <meta property="og:description" content="Planifica tus vídeos como un profesional con esta herramienta de storyboard online y gratuita. Ideal para creadores de contenido, cineastas y educadores." />
+  <meta property="og:description" content="Planifica tus vídeos como un profesional con esta herramienta de storyboard y escaleta online y gratuita. Ideal para creadores de contenido, cineastas y educadores." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +31,7 @@
     "@graph": [
       {
         "@type": "SoftwareApplication",
-        "name": "Storyboard for Creators",
+        "name": "Storyboard y Escaleta para Creators",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Web",
         "offers": {
@@ -39,7 +39,7 @@
           "price": "0",
           "priceCurrency": "USD"
         },
-        "description": "Una herramienta online y gratuita para crear storyboards detallados, planificar secuencias, añadir notas, referencias visuales y exportar a PDF y ZIP. Diseñada para creadores de contenido, cineastas y educadores.",
+        "description": "Una herramienta online y gratuita para crear storyboards y escaletas detalladas, planificar secuencias, añadir notas, referencias visuales y exportar a PDF y ZIP. Diseñada para creadores de contenido, cineastas y educadores.",
         "url": "https://[TU-URL-AQUI.com]/final.html"
       }
     ]
@@ -244,18 +244,18 @@
   <main>
     <section class="hero">
       <img src="Logo.png" alt="Logo de Storyboard for Creators" class="hero-logo">
-      <h2>Crea Storyboards Profesionales, Fácil y Rápido.</h2>
-      <p>La herramienta definitiva para creadores de contenido, cineastas y educadores. Planifica tus vídeos, organiza tus ideas y visualiza tu proyecto final, todo en un solo lugar y completamente gratis.</p>
+      <h2>Crea Storyboards y Escaletas Profesionales, Fácil y Rápido.</h2>
+      <p>La herramienta definitiva para creadores de contenido. Planifica tus vídeos, organiza tus ideas en una escaleta clara y visualiza tu proyecto final, todo en un solo lugar y completamente gratis.</p>
       <a href="#app" class="btn primary">Empezar a Crear Ahora</a>
     </section>
 
     <section class="features">
       <h2>Características Principales</h2>
       <div class="features-grid">
-        <div class="feature-item"><span class="material-symbols-rounded">speed</span><h3>Carga Eficiente</h3><p>Las imágenes se cargan de forma inteligente a medida que las necesitas, garantizando un rendimiento fluido incluso en proyectos grandes.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">layers</span><h3>Escaleta Detallada</h3><p>Organiza tu guion en una escaleta de secuencias. Añade notas, localizaciones y detalles de producción para cada escena.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">palette</span><h3>Dibujo Avanzado</h3><p>Usa herramientas como flechas, rectángulos y un selector de color para crear storyboards más detallados y expresivos.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">dark_mode</span><h3>Modo Oscuro</h3><p>Trabaja cómodamente en cualquier condición de luz con el nuevo tema oscuro, que cuida tu vista y tu concentración.</p></div>
-        <div class="feature-item"><span class="material-symbols-rounded">archive</span><h3>Exportación ZIP</h3><p>Guarda todo tu proyecto, datos e imágenes, en un único y práctico archivo .zip para copias de seguridad o para moverlo a otro equipo.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">speed</span><h3>Rendimiento Optimizado</h3><p>Las imágenes se cargan de forma inteligente a medida que las necesitas, garantizando una experiencia fluida incluso en proyectos grandes.</p></div>
       </div>
     </section>
 
@@ -351,19 +351,16 @@
       async function loadInitialState() { try { const savedState = await db.project.get(PROJECT_ID); if (savedState) { delete savedState.id; Object.assign(state, savedState); state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); } } catch (error) { console.error("Error al cargar desde IndexedDB:", error); } }
       function revokeObjectURLs() { objectURLs.forEach(url => URL.revokeObjectURL(url)); objectURLs = []; }
 
-      // --- LAZY LOADING OBSERVER ---
       const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const sceneEl = entry.target;
             
-            // Lazy load reference images
             $$('img[data-src]', sceneEl).forEach(img => {
               img.src = img.dataset.src;
               img.removeAttribute('data-src');
             });
 
-            // Lazy load storyboard canvas
             const canvas = $('canvas[data-src]', sceneEl);
             if (canvas) {
               const url = canvas.dataset.src;
@@ -372,7 +369,7 @@
               image.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                URL.revokeObjectURL(url);
+                // URL.revokeObjectURL(url); We keep it in objectURLs to revoke later
               };
               image.src = url;
               canvas.removeAttribute('data-src');
@@ -382,7 +379,6 @@
           }
         });
       }, { rootMargin: '200px' });
-
 
       function render() {
         revokeObjectURLs();
@@ -394,7 +390,7 @@
         state.scenes.forEach((s, i) => {
           const sceneEl = renderScene(s, i);
           wrap.appendChild(sceneEl);
-          lazyLoadObserver.observe(sceneEl); // Observe each new scene element
+          lazyLoadObserver.observe(sceneEl);
         });
       }
       
@@ -403,7 +399,7 @@
         el.className = 'scene';
         el.dataset.id = scene.id;
         
-        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia: planos, diálogos, acciones, audio, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
+        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia, el corazón de tu escaleta. Describe planos, diálogos, acciones, atrezo, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
         
         const updateAndRender = async () => { await persist(); render(); };
         const update = async () => { await persist(); };
@@ -453,7 +449,7 @@
             t.innerHTML = `<img alt="${escapeHtml(r.name)}"/><div class="thumb-name-wrapper"><p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar el nombre">${escapeHtml(r.name)}</p></div><div class="x" title="Quitar imagen">&times;</div>`;
             if (r.data instanceof Blob) { 
               const url = URL.createObjectURL(r.data); 
-              $('img', t).dataset.src = url; // Lazy loading
+              $('img', t).dataset.src = url; 
               objectURLs.push(url); 
             }
             $('.x', t).onclick = async () => { scene.refs = scene.refs.filter(x => x.id !== r.id); await updateAndRender(); };
@@ -473,7 +469,7 @@
         colorPicker.value = document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000';
         if (scene.sketch instanceof Blob) {
           const url = URL.createObjectURL(scene.sketch);
-          canvas.dataset.src = url; // Lazy loading
+          canvas.dataset.src = url;
           objectURLs.push(url);
         }
         
@@ -756,11 +752,8 @@
         <span class="material-symbols-rounded help-modal-close" id="help-modal-close" title="Cerrar">&times;</span>
       </div>
       <div class="help-modal-content">
-        <h3>Gestión del Proyecto</h3>
-        <p>En la parte superior de la aplicación encontrarás los controles generales para todo tu proyecto.</p>
-        
         <h3>Trabajando con Secuencias</h3>
-        <p>Cada tarjeta representa una secuencia de tu proyecto. En la cabecera de cada una, ahora tienes un nuevo botón para <strong>descargar la imagen del storyboard</strong> de esa secuencia.</p>
+        <p>Cada tarjeta representa una secuencia en tu escaleta. En la cabecera de cada una, ahora tienes un nuevo botón para <strong>descargar la imagen del storyboard</strong> de esa secuencia.</p>
 
         <h4>Pestañas de Contenido</h4>
         <p>La pestaña de <strong>Storyboard</strong> ahora es mucho más potente:</p>
