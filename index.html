@@ -621,242 +621,162 @@
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Mi Nuevo Proyecto'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
-      // ---------- START: REVISED PDF WORKER SCRIPT (PROFESSIONAL VERSION) ----------
+      // ---------- START: NEW, SIMPLIFIED & ROBUST PDF WORKER SCRIPT ----------
       const pdfWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-        // Font data for Roboto (supports UTF-8 characters)
-        const robotoNormal = 'PASTE_ROBOTO_NORMAL_BASE64_HERE'; // Omitted for brevity, will be auto-replaced
-        const robotoBold = 'PASTE_ROBOTO_BOLD_BASE64_HERE'; // Omitted for brevity, will be auto-replaced
 
         self.onmessage = async (e) => {
-            const { state } = e.data;
-            const { jsPDF } = self.jspdf;
-            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-
-            // ======== DOCUMENT CONSTANTS AND STYLES ========
-            const PAGE_W = doc.internal.pageSize.getWidth();
-            const PAGE_H = doc.internal.pageSize.getHeight();
-            const MARGIN = 50;
-            const CONTENT_W = PAGE_W - MARGIN * 2;
-            const COLORS = { text: '#212121', muted: '#757575', line: '#E0E0E0', link: '#007AFF' };
-            const STATUS_COLORS = { red: '#d70015', orange: '#ff9500', green: '#34c759' };
-            const FONT_SIZES = { h1: 28, h2: 18, h3: 14, body: 10, small: 8 };
-
-            // ======== ADD CUSTOM FONT FOR UTF-8 SUPPORT ========
-            // This is a large block of Base64 text. To keep the code clean, it's represented as a placeholder.
-            // The actual Base64 data for Roboto is quite large. Let's assume it's loaded here.
-            // In a real implementation, you'd paste the full Base64 string.
-            // For now, we'll gracefully fallback to helvetica if fonts are missing.
             try {
-                // The actual Base64 strings are very long and have been omitted.
-                // Replace '...' with the full Base64 encoded font file.
-                const robotoNormalFont = 'AAEAAAARAQAABAAQR0RFRg...'; // This is a placeholder
-                const robotoBoldFont = 'AAEAAAARAQAABAAQR0RFRg...'; // This is a placeholder
-                doc.addFileToVFS('Roboto-Regular.ttf', robotoNormalFont);
-                doc.addFileToVFS('Roboto-Bold.ttf', robotoBoldFont);
-                doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-                doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
-                doc.setFont('Roboto', 'normal');
-            } catch (fontError) {
-                console.warn("Could not load custom fonts, falling back to Helvetica.", fontError);
-                // Fallback fonts are already handled by jsPDF if custom ones fail.
-            }
+                const { state } = e.data;
+                const { jsPDF } = self.jspdf;
+                const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
-            let y = MARGIN; // Global Y cursor
+                // --- Constants and Helpers ---
+                const MARGIN = 40;
+                const PAGE_W = doc.internal.pageSize.getWidth();
+                const PAGE_H = doc.internal.pageSize.getHeight();
+                const CONTENT_W = PAGE_W - MARGIN * 2;
+                let y = MARGIN;
 
-            // ======== HELPER FUNCTIONS ========
-            const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
+                const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
 
-            const checkAndAddPage = (requiredHeight) => {
-                if (y + requiredHeight > PAGE_H - MARGIN) {
-                    drawFooter(doc.internal.getNumberOfPages());
-                    doc.addPage();
-                    y = MARGIN;
-                    drawHeader();
+                function checkPageBreak(requiredHeight) {
+                    if (y + requiredHeight > PAGE_H - MARGIN) {
+                        doc.addPage();
+                        y = MARGIN;
+                        return true;
+                    }
+                    return false;
                 }
-            };
-            
-            const drawHeader = () => {
-                doc.setFontSize(FONT_SIZES.small);
-                doc.setTextColor(COLORS.muted);
-                doc.text(state.title || 'Proyecto', MARGIN, MARGIN / 2, { align: 'left' });
-            };
 
-            const drawFooter = (pageNumber, totalPages) => {
-                doc.setFontSize(FONT_SIZES.small);
-                doc.setTextColor(COLORS.muted);
-                const pageText = \`Página \${pageNumber} de \${totalPages}\`;
-                doc.text(pageText, PAGE_W / 2, PAGE_H - MARGIN / 2, { align: 'center' });
-                doc.text('Generado con Storyboard for Creators', PAGE_W - MARGIN, PAGE_H - MARGIN / 2, { align: 'right' });
-            };
+                // --- 1. Draw Title Page ---
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(24);
+                doc.text(state.title || 'Proyecto de Storyboard', PAGE_W / 2, y + 20, { align: 'center' });
+                y += 60;
 
-            // ======== 1. DRAW COVER PAGE ========
-            function drawCoverPage() {
-                doc.setFont('Roboto', 'bold');
-                doc.setFontSize(FONT_SIZES.h1);
-                doc.setTextColor(COLORS.text);
-                const titleLines = doc.splitTextToSize(state.title || 'Proyecto de Storyboard', CONTENT_W);
-                doc.text(titleLines, PAGE_W / 2, PAGE_H / 2 - 100, { align: 'center' });
-
+                doc.setFont('helvetica', 'normal');
                 if (state.author) {
-                    doc.setFont('Roboto', 'normal');
-                    doc.setFontSize(FONT_SIZES.h3);
-                    doc.setTextColor(COLORS.muted);
-                    doc.text(\`Por: \${state.author}\`, PAGE_W / 2, PAGE_H / 2 - 100 + titleLines.length * FONT_SIZES.h1 + 10, { align: 'center' });
-                }
-
-                if (state.synopsis) {
-                    doc.setFontSize(FONT_SIZES.body);
-                    doc.setTextColor(COLORS.text);
-                    const synopsisLines = doc.splitTextToSize(state.synopsis, CONTENT_W * 0.8);
-                    doc.text(synopsisLines, PAGE_W / 2, PAGE_H / 2 - 20, { align: 'center' });
-                }
-
-                doc.setFontSize(FONT_SIZES.small);
-                doc.setTextColor(COLORS.muted);
-                doc.text(\`Generado el: \${new Date().toLocaleDateString()}\`, PAGE_W / 2, PAGE_H - MARGIN * 2, { align: 'center' });
-            }
-            
-            drawCoverPage();
-
-            // ======== 2. DRAW SCENE PAGES ========
-            for (let i = 0; i < state.scenes.length; i++) {
-                const s = state.scenes[i];
-                
-                doc.addPage();
-                y = MARGIN;
-                drawHeader();
-
-                // --- Scene Title ---
-                checkAndAddPage(40);
-                doc.setFont('Roboto', 'bold');
-                doc.setFontSize(FONT_SIZES.h2);
-                doc.setTextColor(COLORS.text);
-                
-                const sceneTitle = \`SECUENCIA \${i + 1}: \${s.title || 'Sin título'}\`;
-                const titleLines = doc.splitTextToSize(sceneTitle, CONTENT_W - 15);
-                
-                if (s.statusColor && STATUS_COLORS[s.statusColor]) {
-                    const titleHeight = doc.getTextDimensions(titleLines).h;
-                    doc.setFillColor(STATUS_COLORS[s.statusColor]);
-                    doc.rect(MARGIN, y - titleHeight / 2 + 5, 4, titleHeight, 'F');
-                }
-                doc.text(titleLines, MARGIN + 15, y + 5);
-                y += doc.getTextDimensions(titleLines).h + 20;
-
-                // --- Metadata (Location & Tags) ---
-                if (s.location || (s.tags && s.tags.length > 0)) {
-                    checkAndAddPage(30);
-                    doc.setFont('Roboto', 'normal');
-                    doc.setFontSize(FONT_SIZES.body);
-                    doc.setTextColor(COLORS.muted);
-                    let metaText = '';
-                    if (s.location) metaText += \`Localización: \${s.location}\`;
-                    if (s.tags && s.tags.length > 0) metaText += (s.location ? '  |  ' : '') + \`Etiquetas: \${s.tags.join(', ')}\`;
-                    
-                    const metaLines = doc.splitTextToSize(metaText, CONTENT_W);
-                    doc.text(metaLines, MARGIN, y);
-                    y += doc.getTextDimensions(metaLines).h + 20;
-                }
-
-                // --- Description ---
-                if (s.description) {
-                    checkAndAddPage(40);
-                    doc.setFont('Roboto', 'bold');
-                    doc.setFontSize(FONT_SIZES.h3);
-                    doc.setTextColor(COLORS.text);
-                    doc.text('Descripción', MARGIN, y);
-                    y += FONT_SIZES.h3 + 5;
-
-                    doc.setFont('Roboto', 'normal');
-                    doc.setFontSize(FONT_SIZES.body);
-                    const descLines = doc.splitTextToSize(s.description, CONTENT_W);
-                    
-                    descLines.forEach(line => {
-                        checkAndAddPage(FONT_SIZES.body);
-                        doc.text(line, MARGIN, y);
-                        y += FONT_SIZES.body + 2;
-                    });
+                    doc.setFontSize(14);
+                    doc.text(\`Autor: \${state.author}\`, PAGE_W / 2, y, { align: 'center' });
                     y += 20;
                 }
-
-                // --- Storyboard ---
-                if (s.sketch && typeof s.sketch === 'string') {
-                    const sbHeight = CONTENT_W * 9 / 16;
-                    checkAndAddPage(sbHeight + 40);
-                    doc.setFont('Roboto', 'bold');
-                    doc.setFontSize(FONT_SIZES.h3);
-                    doc.setTextColor(COLORS.text);
-                    doc.text('Storyboard', MARGIN, y);
-                    y += FONT_SIZES.h3 + 5;
-                    
-                    try {
-                        doc.addImage(s.sketch, 'PNG', MARGIN, y, CONTENT_W, sbHeight, undefined, 'FAST');
-                    } catch (imgError) {
-                        doc.text('Error al cargar la imagen del storyboard.', MARGIN, y);
-                    }
-                    y += sbHeight + 25;
+                
+                if (state.synopsis) {
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Sinopsis', MARGIN, y);
+                    y += 20;
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(10);
+                    const synopsisLines = doc.splitTextToSize(state.synopsis, CONTENT_W);
+                    doc.text(synopsisLines, MARGIN, y);
                 }
 
-                // --- References ---
-                if (s.refs && s.refs.length > 0) {
-                    const refs = s.refs.filter(r => r.data && typeof r.data === 'string');
+                // --- 2. Draw Scenes ---
+                for (let i = 0; i < state.scenes.length; i++) {
+                    const scene = state.scenes[i];
+                    
+                    // Start each scene on a new page for simplicity and clarity
+                    doc.addPage();
+                    y = MARGIN;
+
+                    // Scene Header
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(16);
+                    doc.text(\`SECUENCIA \${i + 1}: \${scene.title || 'Sin título'}\`, MARGIN, y);
+                    y += 30;
+
+                    // Metadata
+                    if (scene.location || (scene.tags && scene.tags.length > 0)) {
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(9);
+                        doc.setTextColor(100);
+                        if(scene.location) { doc.text(\`Localización: \${scene.location}\`, MARGIN, y); y += 15; }
+                        if(scene.tags && scene.tags.length > 0) { doc.text(\`Etiquetas: \${scene.tags.join(', ')}\`, MARGIN, y); y += 15; }
+                        y += 10;
+                    }
+                    
+                    // Description
+                    if (scene.description) {
+                        checkPageBreak(40);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(12);
+                        doc.setTextColor(0);
+                        doc.text('Descripción', MARGIN, y);
+                        y += 20;
+
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(10);
+                        const descLines = doc.splitTextToSize(scene.description, CONTENT_W);
+                        descLines.forEach(line => {
+                            checkPageBreak(12);
+                            doc.text(line, MARGIN, y);
+                            y += 12;
+                        });
+                        y += 20;
+                    }
+
+                    // Storyboard Image
+                    if (scene.sketch && typeof scene.sketch === 'string') {
+                        const imgHeight = CONTENT_W * 9 / 16;
+                        checkPageBreak(imgHeight + 40);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(12);
+                        doc.setTextColor(0);
+                        doc.text('Storyboard', MARGIN, y);
+                        y += 20;
+                        try {
+                            doc.addImage(scene.sketch, 'PNG', MARGIN, y, CONTENT_W, imgHeight);
+                            y += imgHeight + 20;
+                        } catch (err) {
+                            doc.text('Error: No se pudo añadir la imagen del storyboard.', MARGIN, y);
+                            y += 20;
+                        }
+                    }
+
+                    // Reference Images
+                    const refs = scene.refs.filter(r => r.data && typeof r.data === 'string');
                     if (refs.length > 0) {
-                        checkAndAddPage(80);
-                        doc.setFont('Roboto', 'bold');
-                        doc.setFontSize(FONT_SIZES.h3);
-                        doc.setTextColor(COLORS.text);
-                        doc.text('Referencias Visuales', MARGIN, y);
-                        y += FONT_SIZES.h3 + 5;
+                        checkPageBreak(40);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(12);
+                        doc.setTextColor(0);
+                        doc.text('Referencias', MARGIN, y);
+                        y += 20;
 
-                        const cols = 3, gap = 10;
-                        const imgW = (CONTENT_W - gap * (cols - 1)) / cols;
-                        const imgH = imgW * 9 / 16;
-                        const nameHeight = FONT_SIZES.small + 4;
-                        let col = 0;
+                        const imgWidth = CONTENT_W / 2 - 5;
+                        const imgHeight = imgWidth * 9 / 16;
 
-                        for (const ref of refs) {
-                            checkAndAddPage(imgH + nameHeight + gap);
-                            
-                            const x = MARGIN + col * (imgW + gap);
+                        for (let j = 0; j < refs.length; j++) {
+                            checkPageBreak(imgHeight + 10);
+                            const x = MARGIN + (j % 2) * (imgWidth + 10);
                             try {
-                                doc.addImage(ref.data, 'JPEG', x, y, imgW, imgH, undefined, 'FAST');
-                            } catch (imgError) {
+                                doc.addImage(refs[j].data, 'JPEG', x, y, imgWidth, imgHeight);
+                            } catch(err) {
                                 doc.text('Error img.', x, y);
                             }
-
-                            doc.setFontSize(FONT_SIZES.small);
-                            doc.setTextColor(COLORS.muted);
-                            doc.text(doc.splitTextToSize(ref.name, imgW), x, y + imgH + nameHeight - 2, { align: 'left' });
-
-                            col++;
-                            if (col >= cols) {
-                                col = 0;
-                                y += imgH + nameHeight + gap;
+                            if (j % 2 !== 0 || j === refs.length - 1) {
+                                y += imgHeight + 10;
                             }
                         }
                     }
                 }
-            }
-            
-            // ======== 3. FINALIZE DOCUMENT (Add Page Numbers) ========
-            const totalPages = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= totalPages; i++) {
-                doc.setPage(i);
-                if (i > 1) { // No header/footer on cover page
-                    drawHeader(); 
-                    drawFooter(i, totalPages);
-                }
-            }
 
-            const pdfBlob = doc.output('blob');
-            self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
+                // --- 3. Finalize and Send ---
+                const pdfBlob = doc.output('blob');
+                self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
+
+            } catch (error) {
+                // If anything fails, send an error message back to the main thread
+                self.postMessage({ error: error.message });
+            }
         };
       `;
-      // ---------- END: REVISED PDF WORKER SCRIPT ----------
+      // ---------- END: NEW PDF WORKER SCRIPT ----------
 
 
-      // Worker for ZIP export, corrected and robust.
+      // Worker for ZIP export, remains unchanged as it was correct.
       const zipWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
         self.onmessage = async (e) => {
@@ -896,13 +816,7 @@
       `;
       
       function createWorker(scriptContent) { 
-          // NOTE: The font Base64 data is huge. We replace placeholder text here to avoid cluttering the code.
-          // This is a "trick" to keep the main script readable. You would normally just paste the huge string in.
-          const finalScript = scriptContent
-              .replace("'PASTE_ROBOTO_NORMAL_BASE64_HERE'", `atob('AAEAAAARAQAABAAQR0RFRg...[REST OF FONT DATA]')`)
-              .replace("'PASTE_ROBOTO_BOLD_BASE64_HERE'", `atob('AAEAAAARAQAABAAQR0RFRg...[REST OF FONT DATA]')`);
-
-          const blob = new Blob([finalScript], { type: 'application/javascript' }); 
+          const blob = new Blob([scriptContent], { type: 'application/javascript' }); 
           return new Worker(URL.createObjectURL(blob)); 
       }
 
@@ -914,19 +828,26 @@
         const worker = createWorker(workerScript);
 
         worker.onmessage = (e) => {
-            const { blob, filename } = e.data;
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(a.href);
+            // Check if the worker sent back an error message
+            if (e.data.error) {
+                console.error('Error desde el Web Worker PDF:', e.data.error);
+                alert('Ocurrió un error al generar el PDF. Revisa la consola para más detalles.');
+            } else {
+                const { blob, filename } = e.data;
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+            // Always clean up
             button.classList.remove('loading');
             button.disabled = false;
             worker.terminate();
         };
 
         worker.onerror = (e) => {
-            console.error('Error en el Web Worker:', e.message, e);
+            console.error('Error fatal en el Web Worker:', e.message, e);
             alert('Ocurrió un error al generar el archivo. Revisa la consola para más detalles.');
             button.classList.remove('loading');
             button.disabled = false;
