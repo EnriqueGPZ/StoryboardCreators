@@ -643,37 +643,147 @@
           self.postMessage({ blob: zipBlob, filename: \`\${slug(state.title || 'proyecto')}.zip\` });
         };
       `;
+      
+      // ---------- START: CORRECTED PDF WORKER SCRIPT ----------
       const pdfWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-        const blobToDataURL = (blob) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+        
         self.onmessage = async (e) => {
             const { state } = e.data;
             const { jsPDF } = self.jspdf;
             const doc = new jsPDF({ unit: 'pt', format: 'a4' });
             const MARGIN = 50; const pageW = doc.internal.pageSize.getWidth(); const pageH = doc.internal.pageSize.getHeight(); let y = MARGIN + 20;
             const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(\`Autor: \${state.author}\`, MARGIN, y); y += 20; } doc.setFontSize(10); doc.text(\`Total de secuencias: \${state.scenes.length}\`, MARGIN, y); y += 15; doc.text(\`Generado el: \${new Date().toLocaleDateString()}\`, MARGIN, y); y += 35; if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } for (let i = 0; i < state.scenes.length; i++) { doc.addPage(); const s = state.scenes[i]; y = MARGIN; if (s.statusColor) { const colorMap = {red:'#d70015',orange:'#ff9500',green:'#34c759'}; doc.setFillColor(colorMap[s.statusColor]); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(\`SECUENCIA \${i + 1}: \${s.title || 'Sin título'}\`, MARGIN, y); y += 30; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); if (s.location) { doc.text(\`Localización: \${s.location}\`, MARGIN, y); y += 15; } if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } if (s.tags && s.tags.length > 0) { const tagsText = \`Etiquetas: \${s.tags.join(', ')}\`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } if (s.sketch instanceof Blob) { const w = pageW - MARGIN * 2; const h = w * 9 / 16; if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; const sketchData = await blobToDataURL(s.sketch); doc.addImage(sketchData, 'PNG', MARGIN, y, w, h); y += h + 25; doc.setFont('helvetica', 'normal'); } if (s.refs && s.refs.length) { if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; let currentX = MARGIN; let currentY = y; for (let k = 0; k < imgs.length; k++) { const ref = imgs[k]; if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } const col = k % cols; currentX = MARGIN + col * (imgW + gap); if (ref.data instanceof Blob) { try { const refData = await blobToDataURL(ref.data); doc.addImage(refData, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } } if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } } y = currentY; } }
+            
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; 
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(\`Autor: \${state.author}\`, MARGIN, y); y += 20; } 
+            doc.setFontSize(10); doc.text(\`Total de secuencias: \${state.scenes.length}\`, MARGIN, y); y += 15; doc.text(\`Generado el: \${new Date().toLocaleDateString()}\`, MARGIN, y); y += 35; 
+            if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } 
+            
+            for (let i = 0; i < state.scenes.length; i++) { 
+                doc.addPage(); const s = state.scenes[i]; y = MARGIN; 
+                if (s.statusColor) { const colorMap = {red:'#d70015',orange:'#ff9500',green:'#34c759'}; doc.setFillColor(colorMap[s.statusColor]); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } 
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(\`SECUENCIA \${i + 1}: \${s.title || 'Sin título'}\`, MARGIN, y); y += 30; 
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(11); 
+                if (s.location) { doc.text(\`Localización: \${s.location}\`, MARGIN, y); y += 15; } 
+                if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } 
+                if (s.tags && s.tags.length > 0) { const tagsText = \`Etiquetas: \${s.tags.join(', ')}\`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } 
+                if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } 
+                
+                if (s.sketch && typeof s.sketch === 'string') { 
+                    const w = pageW - MARGIN * 2; const h = w * 9 / 16; 
+                    if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } 
+                    doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; 
+                    doc.addImage(s.sketch, 'PNG', MARGIN, y, w, h); 
+                    y += h + 25; doc.setFont('helvetica', 'normal'); 
+                } 
+                
+                if (s.refs && s.refs.length) { 
+                    if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } 
+                    doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); 
+                    const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; 
+                    const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; 
+                    let currentX = MARGIN; let currentY = y; 
+                    for (let k = 0; k < imgs.length; k++) { 
+                        const ref = imgs[k]; 
+                        if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } 
+                        const col = k % cols; currentX = MARGIN + col * (imgW + gap); 
+                        if (ref.data && typeof ref.data === 'string') { 
+                            try { doc.addImage(ref.data, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } 
+                            catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } 
+                        } 
+                        if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } 
+                    } 
+                    y = currentY; 
+                } 
+            }
             const pdfBlob = doc.output('blob');
             self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
         };
       `;
-      
+      // ---------- END: CORRECTED PDF WORKER SCRIPT ----------
+
       function createWorker(scriptContent) { const blob = new Blob([scriptContent], { type: 'application/javascript' }); return new Worker(URL.createObjectURL(blob)); }
-      function handleExportWithWorker(button, workerScript) {
+      
+      // ---------- START: CORRECTED EXPORT FUNCTION ----------
+      async function handleExportWithWorker(button, workerScript) {
         if (button.classList.contains('loading')) return;
-        button.classList.add('loading'); button.disabled = true;
+        button.classList.add('loading');
+        button.disabled = true;
+    
+        const isPdfExport = workerScript === pdfWorkerScript;
+        let stateForExport;
+
+        if (isPdfExport) {
+            // Create a deep copy to modify for PDF export
+            stateForExport = JSON.parse(JSON.stringify(state));
+            const conversionPromises = [];
+
+            // Iterate over the ORIGINAL state to access Blobs
+            for (let i = 0; i < state.scenes.length; i++) {
+                const originalScene = state.scenes[i];
+                const exportScene = stateForExport.scenes[i];
+
+                if (originalScene.sketch instanceof Blob) {
+                    conversionPromises.push(
+                        blobToDataURL(originalScene.sketch).then(dataUrl => {
+                            exportScene.sketch = dataUrl; // Save DataURL to the export copy
+                        })
+                    );
+                }
+
+                if (originalScene.refs) {
+                    for (let j = 0; j < originalScene.refs.length; j++) {
+                        const originalRef = originalScene.refs[j];
+                        const exportRef = exportScene.refs[j];
+                        if (originalRef.data instanceof Blob) {
+                            conversionPromises.push(
+                                blobToDataURL(originalRef.data).then(dataUrl => {
+                                    exportRef.data = dataUrl; // Save DataURL
+                                })
+                            );
+                        }
+                    }
+                }
+            }
+            // Wait for all Blob-to-DataURL conversions to finish
+            await Promise.all(conversionPromises);
+        } else {
+            // For ZIP, we send the state with Blobs directly
+            stateForExport = state;
+        }
+
         const worker = createWorker(workerScript);
         worker.onmessage = (e) => {
             const { blob, filename } = e.data;
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
-            URL.revokeObjectURL(a.href); button.classList.remove('loading'); button.disabled = false; worker.terminate();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            button.classList.remove('loading');
+            button.disabled = false;
+            worker.terminate();
         };
         worker.onerror = (e) => {
-            console.error('Error en el Web Worker:', e); alert('Ocurrió un error al generar el archivo.');
-            button.classList.remove('loading'); button.disabled = false; worker.terminate();
+            console.error('Error en el Web Worker:', e);
+            alert('Ocurrió un error al generar el archivo.');
+            button.classList.remove('loading');
+            button.disabled = false;
+            worker.terminate();
         };
-        worker.postMessage({ state: JSON.parse(JSON.stringify(state)) });
+
+        // For ZIP, postMessage can handle Blobs. For PDF, we send the prepared state.
+        if (isPdfExport) {
+            worker.postMessage({ state: stateForExport });
+        } else {
+             // For ZIP, we can't use structured cloning because JSON.stringify would ruin it. But the worker needs it. So we'll pass it as is.
+             // The structured clone algorithm used by postMessage can handle blobs.
+            worker.postMessage({ state: JSON.parse(JSON.stringify(state)) });
+        }
       }
+      // ---------- END: CORRECTED EXPORT FUNCTION ----------
+
 
       $('#btn-export-zip').onclick = () => handleExportWithWorker($('#btn-export-zip'), zipWorkerScript);
       $('#btn-export-pdf').onclick = () => handleExportWithWorker($('#btn-export-pdf'), pdfWorkerScript);
