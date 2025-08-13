@@ -354,14 +354,10 @@
       const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            const sceneEl = entry.target;
+            const el = entry.target;
             
-            $$('img[data-src]', sceneEl).forEach(img => {
-              img.src = img.dataset.src;
-              img.removeAttribute('data-src');
-            });
-
-            const canvas = $('canvas[data-src]', sceneEl);
+            // This now only applies to the canvas
+            const canvas = $('canvas[data-src]', el);
             if (canvas) {
               const url = canvas.dataset.src;
               const ctx = canvas.getContext('2d');
@@ -374,7 +370,7 @@
               canvas.removeAttribute('data-src');
             }
             
-            observer.unobserve(sceneEl);
+            observer.unobserve(el);
           }
         });
       }, { rootMargin: '200px' });
@@ -389,6 +385,7 @@
         state.scenes.forEach((s, i) => {
           const sceneEl = renderScene(s, i);
           wrap.appendChild(sceneEl);
+          // Only observe the whole scene element for the canvas lazy loading
           lazyLoadObserver.observe(sceneEl);
         });
       }
@@ -447,8 +444,9 @@
             const t = document.createElement('div'); t.className = 'thumb'; 
             t.innerHTML = `<img alt="${escapeHtml(r.name)}"/><div class="thumb-name-wrapper"><p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar el nombre">${escapeHtml(r.name)}</p></div><div class="x" title="Quitar imagen">&times;</div>`;
             if (r.data instanceof Blob) { 
+              // <-- CAMBIO CLAVE: Carga directa de la imagen
               const url = URL.createObjectURL(r.data); 
-              $('img', t).dataset.src = url; 
+              $('img', t).src = url; // Se asigna directamente a SRC, no a data-src
               objectURLs.push(url); 
             }
             $('.x', t).onclick = async () => { scene.refs = scene.refs.filter(x => x.id !== r.id); await updateAndRender(); };
@@ -468,7 +466,7 @@
         colorPicker.value = document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000';
         if (scene.sketch instanceof Blob) {
           const url = URL.createObjectURL(scene.sketch);
-          canvas.dataset.src = url;
+          canvas.dataset.src = url; // El canvas sigue usando lazy load, que es seguro
           objectURLs.push(url);
         }
         
@@ -797,7 +795,6 @@
         button.classList.add('loading');
         button.disabled = true;
 
-        // <-- LA SOLUCIÓN DEFINITIVA: Leer siempre desde la base de datos antes de exportar.
         const stateFromDB = await db.project.get(PROJECT_ID);
         if (!stateFromDB) {
             alert("No hay proyecto guardado para exportar.");
@@ -833,7 +830,7 @@
             worker.terminate();
         };
         
-        const stateToExport = stateFromDB; // Usamos el estado leído de la DB
+        const stateToExport = stateFromDB;
 
         if (workerScript === pdfWorkerScript) {
             const stateForExport = JSON.parse(JSON.stringify(stateToExport));
