@@ -156,7 +156,7 @@
 
     .thumbs{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:10px;}
     .thumb{position:relative;background:var(--bg-alt);overflow:hidden;border-radius:4px;}
-    .thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;}
+    .thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background-color:var(--bg-alt);}
     .thumb .x{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;font-size:14px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;}
     .thumb .x:hover{background:rgba(0,0,0,0.7);}
     .thumb-name-wrapper { padding: 4px 8px 8px; background-color: var(--bg-alt); border-top: 1px solid var(--line); }
@@ -252,7 +252,7 @@
     <section class="features">
       <h2>Características Principales</h2>
       <div class="features-grid">
-        <div class="feature-item"><span class="material-symbols-rounded">layers</span><h3>Planificación por Secuencias</h3><p>Organiza tu guion en secuencias. Cada secuencia puede contener una o varias escenas detalladas en su descripción.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">speed</span><h3>Carga Eficiente</h3><p>Las imágenes se cargan de forma inteligente a medida que las necesitas, garantizando un rendimiento fluido incluso en proyectos grandes.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">palette</span><h3>Dibujo Avanzado</h3><p>Usa herramientas como flechas, rectángulos y un selector de color para crear storyboards más detallados y expresivos.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">dark_mode</span><h3>Modo Oscuro</h3><p>Trabaja cómodamente en cualquier condición de luz con el nuevo tema oscuro, que cuida tu vista y tu concentración.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">archive</span><h3>Exportación ZIP</h3><p>Guarda todo tu proyecto, datos e imágenes, en un único y práctico archivo .zip para copias de seguridad o para moverlo a otro equipo.</p></div>
@@ -351,6 +351,39 @@
       async function loadInitialState() { try { const savedState = await db.project.get(PROJECT_ID); if (savedState) { delete savedState.id; Object.assign(state, savedState); state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); } } catch (error) { console.error("Error al cargar desde IndexedDB:", error); } }
       function revokeObjectURLs() { objectURLs.forEach(url => URL.revokeObjectURL(url)); objectURLs = []; }
 
+      // --- LAZY LOADING OBSERVER ---
+      const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const sceneEl = entry.target;
+            
+            // Lazy load reference images
+            $$('img[data-src]', sceneEl).forEach(img => {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+            });
+
+            // Lazy load storyboard canvas
+            const canvas = $('canvas[data-src]', sceneEl);
+            if (canvas) {
+              const url = canvas.dataset.src;
+              const ctx = canvas.getContext('2d');
+              const image = new Image();
+              image.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                URL.revokeObjectURL(url);
+              };
+              image.src = url;
+              canvas.removeAttribute('data-src');
+            }
+            
+            observer.unobserve(sceneEl);
+          }
+        });
+      }, { rootMargin: '200px' });
+
+
       function render() {
         revokeObjectURLs();
         $('#title').value = state.title;
@@ -358,7 +391,11 @@
         $('#synopsis').value = state.synopsis;
         const wrap = $('#scenes');
         wrap.innerHTML = '';
-        state.scenes.forEach((s, i) => wrap.appendChild(renderScene(s, i)));
+        state.scenes.forEach((s, i) => {
+          const sceneEl = renderScene(s, i);
+          wrap.appendChild(sceneEl);
+          lazyLoadObserver.observe(sceneEl); // Observe each new scene element
+        });
       }
       
       function renderScene(scene, index) {
@@ -414,7 +451,11 @@
           scene.refs.forEach(r => { 
             const t = document.createElement('div'); t.className = 'thumb'; 
             t.innerHTML = `<img alt="${escapeHtml(r.name)}"/><div class="thumb-name-wrapper"><p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar el nombre">${escapeHtml(r.name)}</p></div><div class="x" title="Quitar imagen">&times;</div>`;
-            if (r.data instanceof Blob) { const url = URL.createObjectURL(r.data); $('img', t).src = url; objectURLs.push(url); }
+            if (r.data instanceof Blob) { 
+              const url = URL.createObjectURL(r.data); 
+              $('img', t).dataset.src = url; // Lazy loading
+              objectURLs.push(url); 
+            }
             $('.x', t).onclick = async () => { scene.refs = scene.refs.filter(x => x.id !== r.id); await updateAndRender(); };
             const nameEl = $('.thumb-name', t);
             nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
@@ -430,7 +471,11 @@
         const sizeInput = $('.size', el);
         const colorPicker = $('.color-picker', el);
         colorPicker.value = document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000';
-        if (scene.sketch instanceof Blob) loadImageToCanvas(scene.sketch, canvas, ctx);
+        if (scene.sketch instanceof Blob) {
+          const url = URL.createObjectURL(scene.sketch);
+          canvas.dataset.src = url; // Lazy loading
+          objectURLs.push(url);
+        }
         
         let activeTool = 'draw', isDrawing = false, startPos = null, lastPos = null, savedCanvasState = null;
         const getPos = (e) => getXY(e, canvas);
@@ -537,7 +582,7 @@
         formatDialog.overlay.onclick = (e) => { if(e.target === formatDialog.overlay) formatDialog.overlay.hidden = true; };
       }
       
-      function exportStoryboardImage(scene, index, format = 'png') {
+      async function exportStoryboardImage(scene, index, format = 'png') {
         if (!(scene.sketch instanceof Blob)) return;
         const mimeType = `image/${format}`;
         const extension = format;
@@ -575,7 +620,6 @@
       helpModal.overlay.onclick = (e) => { if (e.target === helpModal.overlay) helpModal.overlay.hidden = true; };
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !helpModal.overlay.hidden) { helpModal.overlay.hidden = true; } });
       
-      function loadImageToCanvas(blob, canvas, ctx) { const url = URL.createObjectURL(blob); const img = new Image(); img.onload = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); URL.revokeObjectURL(url); }; img.src = url; }
       $('#title').addEventListener('input', async e => { state.title = e.target.value; await persist(); });
       $('#author').addEventListener('input', async e => { state.author = e.target.value; await persist(); });
       $('#synopsis').addEventListener('input', async e => { state.synopsis = e.target.value; await persist(); });
