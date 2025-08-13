@@ -23,7 +23,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
   
   <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-  <!-- AÑADIDA LIBRERÍA JSZIP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   
   <script type="application/ld+json">
@@ -90,8 +89,23 @@
       --canvas-bg: #f5f5f7;
       --bg-alt: #f5f5f7; 
     }
+    /* --- NUEVO: ESTILOS PARA MODO OSCURO --- */
+    body.dark-theme {
+      --bg: #1c1c1e;
+      --surface: #2c2c2e;
+      --line: #3a3a3c;
+      --txt: #f2f2f7;
+      --muted: #8d8d92;
+      --acc: #0a84ff;
+      --red: #ff453a;
+      --orange: #ff9f0a;
+      --green: #30d158;
+      --canvas-bg: #1c1c1e;
+      --bg-alt: #2c2c2e;
+    }
+
     html { scroll-behavior: smooth; }
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:'Roboto',sans-serif;color:var(--txt);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:'Roboto',sans-serif;color:var(--txt);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;transition: background-color .2s, color .2s;}
     .container{max-width:800px;margin:48px auto;padding:0 24px 64px;}
     .btn{appearance:none;border:none;background:transparent;color:var(--txt);padding:0;font-size:13px;font-weight:500;cursor:pointer;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:background-color .2s,color .2s,border-color .2s;border-radius:0; text-decoration: none;}
     
@@ -134,6 +148,7 @@
     
     .project-section { margin-bottom: 64px; }
     #app header{ display:flex; gap:16px; align-items:center; justify-content:flex-end; flex-wrap:wrap; padding:16px 24px; background:rgba(255,255,255,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); position:sticky; top:0; z-index:50; border-bottom:1px solid var(--line); }
+    body.dark-theme #app header { background: rgba(28, 28, 30, 0.7); }
     #app header .toolbar .btn{width:40px;height:40px;}
     #app header .toolbar .btn .material-symbols-rounded{font-size:22px;}
     #app header .toolbar .btn.primary{background-color:var(--acc);color:#fff;}
@@ -145,15 +160,17 @@
     textarea{min-height:120px;resize:vertical;}
     label{font-size:13px;color:var(--muted);font-weight:500;display:block;margin-bottom:8px;}
     .scene{background:var(--surface);margin-bottom:32px; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;}
+    body.dark-theme .scene { box-shadow: none; }
     .scene-hd{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);}
     .scene-idx{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:0.5px;}
-    .scene-ttl{flex:1;min-width:200px;font-size:16px;font-weight:700;border:none;background:transparent;padding:0;}
+    .scene-ttl{flex:1;min-width:200px;font-size:16px;font-weight:700;border:none;background:transparent;padding:0; color: var(--txt);}
     .scene-ttl:focus{outline:none;}
     .scene .bd{padding:20px;}
     .scene-hd .toolbar{display:flex; align-items:center; gap: 4px;}
     .scene-hd .btn{width:32px;height:32px;color:var(--muted);}
     .scene-hd .btn:hover{background-color:var(--line);color:var(--txt);}
     .scene-hd .btn.red:hover{background-color:#fff5f5;color:var(--red);}
+    body.dark-theme .scene-hd .btn.red:hover{background-color:rgba(255,69,58,0.1);color:var(--red);}
     .scene-hd .material-symbols-rounded{font-size:20px;}
     .tags-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
     .chip{font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--line);padding:4px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:500;}
@@ -174,7 +191,7 @@
     .thumb .x:hover{background:rgba(0,0,0,0.7);}
     .thumb-name-wrapper { padding: 4px 8px 8px; background-color: var(--bg-alt); border-top: 1px solid var(--line); }
     .thumb-name { font-size: 12px; text-align: center; color: var(--muted); padding: 4px; border-radius: 4px; word-break: break-all; cursor: text; transition: background-color .2s, box-shadow .2s; }
-    .thumb-name:focus { background-color: #fff; outline: none; box-shadow: 0 0 0 2px var(--acc); color: var(--txt); }
+    .thumb-name:focus { background-color: var(--surface); outline: none; box-shadow: 0 0 0 2px var(--acc); color: var(--txt); }
 
     .sketch{border:1px solid var(--line);overflow:hidden;}
     canvas{display:block;width:100%;height:auto;background:var(--canvas-bg);cursor:crosshair;}
@@ -183,6 +200,10 @@
     .controls .btn .material-symbols-rounded { font-size: 20px; margin-right: 4px; }
     .controls .btn.red{border:1px solid var(--red);}
     .controls .btn.active{background-color:var(--acc);color:#fff;border-color:var(--acc);}
+    body.dark-theme .controls .btn.red{border:1px solid var(--red); color: var(--red);}
+    body.dark-theme .controls .btn.red:hover{background-color:rgba(255,69,58,0.1);}
+
+
     .grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
     @media (max-width: 500px){.grid-layout{grid-template-columns:1fr;}}
     .dialog-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
@@ -220,10 +241,24 @@
     .help-modal-content h3 { font-size: 22px; margin: 40px 0 16px 0; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
     .help-modal-content h4 { font-size: 16px; margin: 24px 0 8px 0; font-weight: 700; }
     .help-modal-content p, .help-modal-content li { font-size: 14px; color: var(--muted); line-height: 1.7; }
-    .help-modal-content ul { padding-left: 20px; margin-top: 0; }
-    .help-modal-content ol { padding-left: 20px; margin-top: 0; }
+    .help-modal-content ul, .help-modal-content ol { padding-left: 20px; margin-top: 0; }
     .help-modal-content strong { color: var(--txt); font-weight: 500; }
     .help-modal-content code { background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  
+    /* --- NUEVO: ESTILOS PARA EL SPINNER DE CARGA --- */
+    .spinner {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin .75s linear infinite;
+    }
+    .btn .spinner { display: none; }
+    .btn.loading .spinner { display: inline-block; }
+    .btn.loading .material-symbols-rounded { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -248,7 +283,7 @@
       <div class="features-grid">
         <div class="feature-item"><span class="material-symbols-rounded">layers</span><h3>Planificación por Secuencias</h3><p>Organiza tu guion en secuencias. Cada secuencia puede contener una o varias escenas detalladas en su descripción.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">draw</span><h3>Storyboard Integrado</h3><p>Dibuja tus planos directamente en la aplicación con nuestro lienzo digital. Una forma visual y rápida de plasmar tus ideas.</p></div>
-        <div class="feature-item"><span class="material-symbols-rounded">collections</span><h3>Referencias Visuales</h3><p>Sube imágenes de referencia para inspiración de estilo, paletas de color, localizaciones o ejemplos de planos.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">dark_mode</span><h3>Modo Oscuro</h3><p>Trabaja cómodamente en cualquier condición de luz con el nuevo tema oscuro, que cuida tu vista y tu concentración.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">archive</span><h3>Exportación ZIP</h3><p>Guarda todo tu proyecto, datos e imágenes, en un único y práctico archivo .zip para copias de seguridad o para moverlo a otro equipo.</p></div>
       </div>
     </section>
@@ -257,11 +292,12 @@
       <header>
         <div class="toolbar">
           <button class="btn primary" id="btn-add" title="Añadir nueva secuencia"><span class="material-symbols-rounded">add</span></button>
-          <button class="btn alt" id="btn-export-pdf" title="Exportar a PDF"><span class="material-symbols-rounded">picture_as_pdf</span></button>
-          <!-- BOTONES MODIFICADOS PARA ZIP -->
-          <button class="btn alt" id="btn-export-zip" title="Exportar a ZIP"><span class="material-symbols-rounded">archive</span></button>
+          <button class="btn alt" id="btn-export-pdf" title="Exportar a PDF"><span class="material-symbols-rounded">picture_as_pdf</span><span class="spinner"></span></button>
+          <button class="btn alt" id="btn-export-zip" title="Exportar a ZIP"><span class="material-symbols-rounded">archive</span><span class="spinner"></span></button>
           <label class="btn alt" title="Importar desde ZIP"><span class="material-symbols-rounded">unarchive</span><input id="import-zip" type="file" accept="application/zip" hidden /></label>
           <button class="btn red" id="btn-clear" title="Vaciar proyecto"><span class="material-symbols-rounded">delete_sweep</span></button>
+          <!-- NUEVO BOTÓN PARA MODO OSCURO -->
+          <button class="btn alt" id="btn-theme-toggle" title="Cambiar tema"><span class="material-symbols-rounded">dark_mode</span></button>
           <button class="btn alt" id="btn-help" title="Ayuda"><span class="material-symbols-rounded">help</span></button>
         </div>
       </header>
@@ -280,7 +316,6 @@
         <div class="faq-container">
             <details><summary>¿Es esta herramienta realmente gratuita?</summary><div class="answer">Sí, 'Storyboard for Creators' es completamente gratuita. No hay funciones de pago ni suscripciones. Todos los datos se guardan localmente en tu propio navegador.</div></details>
             <details><summary>¿Dónde se guardan mis datos?</summary><div class="answer">Tus proyectos se guardan de forma segura en el almacenamiento de tu navegador (usando IndexedDB). Esto significa que son privados y solo accesibles desde el dispositivo y navegador que utilizas. Nadie más puede verlos.</div></details>
-            <!-- PREGUNTA MODIFICADA PARA ZIP -->
             <details><summary>¿Puedo usar mis proyectos en otro ordenador?</summary><div class="answer">Sí. Puedes usar la función 'Exportar a ZIP' para guardar una copia de seguridad completa de tu proyecto (datos e imágenes) como un archivo <code>.zip</code>. Luego, en otro ordenador, puedes usar 'Importar desde ZIP' para cargar y continuar trabajando en tu proyecto.</div></details>
         </div>
     </section>
@@ -290,13 +325,38 @@
     </footer>
   </main>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
     const db = new Dexie('storyboardAppDB');
     db.version(1).stores({ project: 'id' });
 
     document.addEventListener('DOMContentLoaded', async () => {
       const $ = (sel, p = document) => p.querySelector(sel);
+      
+      // --- LÓGICA DE MODO OSCURO ---
+      const themeToggle = $('#btn-theme-toggle');
+      const themeIcon = $('span', themeToggle);
+      
+      const applyTheme = (theme) => {
+        if (theme === 'dark') {
+          document.body.classList.add('dark-theme');
+          themeIcon.textContent = 'light_mode';
+          themeToggle.title = 'Cambiar a tema claro';
+        } else {
+          document.body.classList.remove('dark-theme');
+          themeIcon.textContent = 'dark_mode';
+          themeToggle.title = 'Cambiar a tema oscuro';
+        }
+      };
+
+      let currentTheme = localStorage.getItem('storyboard-theme') || 'light';
+      applyTheme(currentTheme);
+
+      themeToggle.onclick = () => {
+        currentTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+        localStorage.setItem('storyboard-theme', currentTheme);
+        applyTheme(currentTheme);
+      };
+
       const $$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
       const uid = () => Math.random().toString(36).slice(2);
       
@@ -325,6 +385,7 @@
       }
       
       function renderScene(scene, index) {
+        // ... (El código de renderScene no cambia, lo omito por brevedad, pero debe estar aquí)
         const el = document.createElement('div');
         el.className = 'scene';
         el.dataset.id = scene.id;
@@ -391,20 +452,22 @@
         let activeTool = 'draw', isDrawing = false, startPos = null, lastPos = null, savedCanvasState = null;
         const getPos = (e) => getXY(e, canvas);
         const drawFinalShape = (start, end) => {
-            ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = '#000000'; ctx.globalCompositeOperation = 'source-over'; ctx.beginPath();
+            ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = document.body.classList.contains('dark-theme') ? '#FFFFFF' : '#000000'; ctx.globalCompositeOperation = 'source-over'; ctx.beginPath();
             if (activeTool === 'line') { ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); } 
             else if (activeTool === 'circle') { const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)); ctx.arc(start.x, start.y, radius, 0, Math.PI * 2); }
             ctx.stroke();
         };
         const startDrawing = (e) => {
           e.preventDefault(); const posEvent = e.touches ? e.touches[0] : e;
-          if (activeTool === 'text') { const text = prompt('Escribe el texto que quieres añadir:', ''); if (text) { const pos = getPos(posEvent); ctx.font = `${+sizeInput.value * 3}px Roboto`; ctx.fillStyle = '#000000'; ctx.globalCompositeOperation = 'source-over'; ctx.fillText(text, pos.x, pos.y); (async () => { scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content'); })(); } return; }
+          const drawColor = document.body.classList.contains('dark-theme') ? '#FFFFFF' : '#000000';
+          if (activeTool === 'text') { const text = prompt('Escribe el texto que quieres añadir:', ''); if (text) { const pos = getPos(posEvent); ctx.font = `${+sizeInput.value * 3}px Roboto`; ctx.fillStyle = drawColor; ctx.globalCompositeOperation = 'source-over'; ctx.fillText(text, pos.x, pos.y); (async () => { scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content'); })(); } return; }
           isDrawing = true; startPos = getPos(posEvent); lastPos = startPos;
           if (activeTool === 'line' || activeTool === 'circle') { savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height); }
         };
         const draw = (e) => {
           if (!isDrawing) return; e.preventDefault(); const posEvent = e.touches ? e.touches[0] : e; const currentPos = getPos(posEvent);
-          if (activeTool === 'draw' || activeTool === 'erase') { ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = '#000000'; ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over'; ctx.beginPath(); ctx.moveTo(lastPos.x, lastPos.y); ctx.lineTo(currentPos.x, currentPos.y); ctx.stroke(); lastPos = currentPos; } 
+          const drawColor = document.body.classList.contains('dark-theme') ? '#FFFFFF' : '#000000';
+          if (activeTool === 'draw' || activeTool === 'erase') { ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = drawColor; ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over'; ctx.beginPath(); ctx.moveTo(lastPos.x, lastPos.y); ctx.lineTo(currentPos.x, currentPos.y); ctx.stroke(); lastPos = currentPos; } 
           else if (savedCanvasState) { ctx.putImageData(savedCanvasState, 0, 0); drawFinalShape(startPos, currentPos); }
         };
         const endDrawing = async (e) => {
@@ -417,7 +480,7 @@
         canvas.addEventListener('touchstart', startDrawing, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); canvas.addEventListener('touchend', endDrawing); canvas.addEventListener('touchcancel', endDrawing);
         $$('.btn[data-tool]', controls).forEach(btn => { btn.onclick = () => { activeTool = btn.dataset.tool; $$('.btn[data-tool]', controls).forEach(b => b.classList.remove('active')); btn.classList.add('active'); }; });
         $('.clear', controls).onclick = async () => { ctx.clearRect(0, 0, canvas.width, canvas.height); scene.sketch = null; await update(); $('.tab[data-tab="storyboard"]', el).classList.remove('has-content'); };
-
+        
         return el;
       }
       
@@ -442,109 +505,137 @@
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Mi Nuevo Proyecto'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
-      // --- NUEVA LÓGICA DE EXPORTACIÓN A ZIP ---
-      $('#btn-export-zip').onclick = () => showDialog({
-          title: 'Exportar a ZIP',
-          message: 'Se generará un archivo .zip con tu proyecto y todas las imágenes. Este proceso puede tardar unos segundos.',
-          confirmText: 'Exportar',
-          onConfirm: async () => {
-              const zip = new JSZip();
-              const assetsFolder = zip.folder("assets");
-              const stateForExport = JSON.parse(JSON.stringify(state));
+      // --- LÓGICA DE WEB WORKERS ---
+      const zipWorkerScript = `
+        self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+        self.onmessage = async (e) => {
+          const { state } = e.data;
+          const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
+          
+          const zip = new JSZip();
+          const assetsFolder = zip.folder("assets");
+          const stateForExport = JSON.parse(JSON.stringify(state));
 
-              for (let i = 0; i < state.scenes.length; i++) {
-                  const scene = state.scenes[i];
-                  const exportScene = stateForExport.scenes[i];
-
-                  if (scene.sketch instanceof Blob) {
-                      const filename = `sketch-${scene.id}.png`;
-                      assetsFolder.file(filename, scene.sketch);
-                      exportScene.sketch = `assets/${filename}`;
-                  }
-                  if (scene.refs && scene.refs.length) {
-                      for (let j = 0; j < scene.refs.length; j++) {
-                          const ref = scene.refs[j];
-                          const exportRef = exportScene.refs[j];
-                          if (ref.data instanceof Blob) {
-                              const extension = ref.data.type.split('/')[1] || 'png';
-                              const filename = `ref-${scene.id}-${ref.id}.${extension}`;
-                              assetsFolder.file(filename, ref.data);
-                              exportRef.data = `assets/${filename}`;
-                          }
+          for (let i = 0; i < state.scenes.length; i++) {
+              const scene = state.scenes[i];
+              const exportScene = stateForExport.scenes[i];
+              if (scene.sketch instanceof Blob) {
+                  const filename = \`sketch-\${scene.id}.png\`;
+                  assetsFolder.file(filename, scene.sketch);
+                  exportScene.sketch = \`assets/\${filename}\`;
+              }
+              if (scene.refs && scene.refs.length) {
+                  for (let j = 0; j < scene.refs.length; j++) {
+                      const ref = scene.refs[j];
+                      const exportRef = exportScene.refs[j];
+                      if (ref.data instanceof Blob) {
+                          const extension = ref.data.type.split('/')[1] || 'png';
+                          const filename = \`ref-\${scene.id}-\${ref.id}.\${extension}\`;
+                          assetsFolder.file(filename, ref.data);
+                          exportRef.data = \`assets/\${filename}\`;
                       }
                   }
               }
-              zip.file("project.json", JSON.stringify(stateForExport, null, 2));
-              const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
-              
-              const a = document.createElement('a');
-              a.href = URL.createObjectURL(zipBlob);
-              a.download = `${slug(state.title || 'proyecto')}.zip`;
-              a.click();
-              URL.revokeObjectURL(a.href);
           }
-      });
+          zip.file("project.json", JSON.stringify(stateForExport, null, 2));
+          const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
+          self.postMessage({ blob: zipBlob, filename: \`\${slug(state.title || 'proyecto')}.zip\` });
+        };
+      `;
 
-      // --- NUEVA LÓGICA DE IMPORTACIÓN DESDE ZIP ---
+      const pdfWorkerScript = `
+        self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        const blobToDataURL = (blob) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+        
+        self.onmessage = async (e) => {
+            const { state } = e.data;
+            const { jsPDF } = self.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            const MARGIN = 50; const pageW = doc.internal.pageSize.getWidth(); const pageH = doc.internal.pageSize.getHeight(); let y = MARGIN + 20;
+            const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
+            
+            // --- Logic from btn-export-pdf ---
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(\`Autor: \${state.author}\`, MARGIN, y); y += 20; } doc.setFontSize(10); doc.text(\`Total de secuencias: \${state.scenes.length}\`, MARGIN, y); y += 15; doc.text(\`Generado el: \${new Date().toLocaleDateString()}\`, MARGIN, y); y += 35; if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } for (let i = 0; i < state.scenes.length; i++) { doc.addPage(); const s = state.scenes[i]; y = MARGIN; if (s.statusColor) { const colorMap = {red:'#d70015',orange:'#ff9500',green:'#34c759'}; doc.setFillColor(colorMap[s.statusColor]); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(\`SECUENCIA \${i + 1}: \${s.title || 'Sin título'}\`, MARGIN, y); y += 30; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); if (s.location) { doc.text(\`Localización: \${s.location}\`, MARGIN, y); y += 15; } if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } if (s.tags && s.tags.length > 0) { const tagsText = \`Etiquetas: \${s.tags.join(', ')}\`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } if (s.sketch instanceof Blob) { const w = pageW - MARGIN * 2; const h = w * 9 / 16; if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; const sketchData = await blobToDataURL(s.sketch); doc.addImage(sketchData, 'PNG', MARGIN, y, w, h); y += h + 25; doc.setFont('helvetica', 'normal'); } if (s.refs && s.refs.length) { if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; let currentX = MARGIN; let currentY = y; for (let k = 0; k < imgs.length; k++) { const ref = imgs[k]; if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } const col = k % cols; currentX = MARGIN + col * (imgW + gap); if (ref.data instanceof Blob) { try { const refData = await blobToDataURL(ref.data); doc.addImage(refData, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } } if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } } y = currentY; } }
+            // --- End Logic ---
+            const pdfBlob = doc.output('blob');
+            self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
+        };
+      `;
+      
+      function createWorker(scriptContent) {
+          const blob = new Blob([scriptContent], { type: 'application/javascript' });
+          return new Worker(URL.createObjectURL(blob));
+      }
+
+      function handleExportWithWorker(button, workerScript) {
+        if (button.classList.contains('loading')) return;
+        button.classList.add('loading');
+        button.disabled = true;
+
+        const worker = createWorker(workerScript);
+        worker.onmessage = (e) => {
+            const { blob, filename } = e.data;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            button.classList.remove('loading');
+            button.disabled = false;
+            worker.terminate();
+        };
+        worker.onerror = (e) => {
+            console.error('Error en el Web Worker:', e);
+            alert('Ocurrió un error al generar el archivo.');
+            button.classList.remove('loading');
+            button.disabled = false;
+            worker.terminate();
+        };
+        worker.postMessage({ state: JSON.parse(JSON.stringify(state)) });
+      }
+
+      $('#btn-export-zip').onclick = () => handleExportWithWorker($('#btn-export-zip'), zipWorkerScript);
+      $('#btn-export-pdf').onclick = () => handleExportWithWorker($('#btn-export-pdf'), pdfWorkerScript);
+
       $('#import-zip').onchange = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
         showDialog({
             title: 'Importar Proyecto desde ZIP',
-            message: 'Esto reemplazará tu proyecto actual. ¿Estás seguro de que quieres continuar?',
+            message: 'Esto reemplazará tu proyecto actual. ¿Estás seguro?',
             confirmText: 'Sí, importar',
             onConfirm: async () => {
                 try {
                     const zip = await JSZip.loadAsync(file);
                     const projectFile = zip.file("project.json");
                     if (!projectFile) throw new Error("El archivo project.json no se encontró en el ZIP.");
-
                     const jsonText = await projectFile.async("string");
                     const data = JSON.parse(jsonText);
-
                     const loadingPromises = [];
                     for (const scene of data.scenes) {
-                        if (typeof scene.sketch === 'string') {
+                        if (typeof scene.sketch === 'string' && scene.sketch.startsWith('assets/')) {
                             const sketchFile = zip.file(scene.sketch);
-                            if(sketchFile) {
-                                loadingPromises.push(
-                                    sketchFile.async("blob").then(blob => { scene.sketch = blob; })
-                                );
-                            }
+                            if(sketchFile) loadingPromises.push(sketchFile.async("blob").then(blob => { scene.sketch = blob; }));
                         }
                         if (scene.refs) {
                             for (const ref of scene.refs) {
-                                if (typeof ref.data === 'string') {
+                                if (typeof ref.data === 'string' && ref.data.startsWith('assets/')) {
                                     const refFile = zip.file(ref.data);
-                                    if(refFile) {
-                                        loadingPromises.push(
-                                            refFile.async("blob").then(blob => { ref.data = blob; })
-                                        );
-                                    }
+                                    if(refFile) loadingPromises.push(refFile.async("blob").then(blob => { ref.data = blob; }));
                                 }
                             }
                         }
                     }
-
                     await Promise.all(loadingPromises);
-                    
                     state = data;
                     state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; });
                     await persist();
                     render();
-
-                } catch (err) {
-                    alert('Error al importar el archivo ZIP.\n\n' + err.message);
-                } finally {
-                    e.target.value = '';
-                }
+                } catch (err) { alert('Error al importar el archivo ZIP.\n\n' + err.message); } 
+                finally { e.target.value = ''; }
             }
         });
       };
-      
-      // La exportación a PDF se mantiene igual, no se ve afectada
-      $('#btn-export-pdf').onclick = () => showDialog({ title: 'Exportar a PDF', message: 'Se generará un archivo PDF de tu proyecto. El proceso puede ser lento si hay muchas imágenes.', confirmText: 'Generar PDF', onConfirm: async () => { const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: 'pt', format: 'a4' }); const MARGIN = 50; const pageW = doc.internal.pageSize.getWidth(); const pageH = doc.internal.pageSize.getHeight(); let y = MARGIN + 20; doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(`Autor: ${state.author}`, MARGIN, y); y += 20; } doc.setFontSize(10); doc.text(`Total de secuencias: ${state.scenes.length}`, MARGIN, y); y += 15; doc.text(`Generado el: ${new Date().toLocaleDateString()}`, MARGIN, y); y += 35; if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } for (let i = 0; i < state.scenes.length; i++) { doc.addPage(); const s = state.scenes[i]; y = MARGIN; if (s.statusColor) { const colorVar = getComputedStyle(document.documentElement).getPropertyValue(`--${s.statusColor}`).trim(); doc.setFillColor(colorVar); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(`SECUENCIA ${i + 1}: ${s.title || 'Sin título'}`, MARGIN, y); y += 30; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); if (s.location) { doc.text(`Localización: ${s.location}`, MARGIN, y); y += 15; } if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } if (s.tags && s.tags.length > 0) { const tagsText = `Etiquetas: ${s.tags.join(', ')}`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } if (s.sketch instanceof Blob) { const w = pageW - MARGIN * 2; const h = w * 9 / 16; if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; const sketchData = await blobToDataURL(s.sketch); doc.addImage(sketchData, 'PNG', MARGIN, y, w, h); y += h + 25; doc.setFont('helvetica', 'normal'); } if (s.refs && s.refs.length) { if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; let currentX = MARGIN; let currentY = y; for (let k = 0; k < imgs.length; k++) { const ref = imgs[k]; if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } const col = k % cols; currentX = MARGIN + col * (imgW + gap); if (ref.data instanceof Blob) { try { const refData = await blobToDataURL(ref.data); doc.addImage(refData, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } } if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } } y = currentY; } } doc.save(`${slug(state.title || 'proyecto')}.pdf`); } });
       
       function swap(arr, i, j) { const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
       function escapeHtml(s = '') { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -577,54 +668,26 @@
       <div class="help-modal-content">
         <h3>Gestión del Proyecto</h3>
         <p>En la parte superior de la aplicación encontrarás los controles generales para todo tu proyecto.</p>
-        <h4>Datos Generales</h4>
-        <p>Puedes rellenar los campos <strong>Título del proyecto</strong>, <strong>Autor</strong> y <strong>Sinopsis</strong>. Esta información aparecerá en la portada de tus exportaciones a PDF y te ayudará a mantener organizada la idea principal de tu trabajo.</p>
         <h4>Barra de Herramientas Principal</h4>
         <ul>
-          <li><strong>Añadir nueva secuencia (+):</strong> Crea una nueva tarjeta de secuencia en blanco al final de tu proyecto.</li>
-          <li><strong>Exportar a PDF:</strong> Genera un documento PDF profesional con todo tu storyboard, listo para imprimir o compartir.</li>
-          <li><strong>Exportar a ZIP:</strong> Guarda una copia de seguridad completa de tu proyecto, incluyendo todas las imágenes, en un archivo <code>.zip</code>. Es la mejor forma de guardar tu trabajo o moverlo a otro ordenador.</li>
-          <li><strong>Importar desde ZIP:</strong> Carga un proyecto previamente guardado desde un archivo <code>.zip</code>.</li>
-          <li><strong>Vaciar proyecto:</strong> Elimina todo el contenido y empieza de cero. ¡Usa esta opción con cuidado!</li>
+            <li><strong>Añadir nueva secuencia (+):</strong> Crea una nueva tarjeta de secuencia en blanco al final de tu proyecto.</li>
+            <li><strong>Exportar a PDF:</strong> Genera un documento PDF profesional con todo tu storyboard. La generación se hace en segundo plano para no bloquear la aplicación.</li>
+            <li><strong>Exportar a ZIP:</strong> Guarda una copia de seguridad completa de tu proyecto (datos e imágenes) en un archivo <code>.zip</code>.</li>
+            <li><strong>Importar desde ZIP:</strong> Carga un proyecto previamente guardado desde un archivo <code>.zip</code>.</li>
+            <li><strong>Vaciar proyecto:</strong> Elimina todo el contenido y empieza de cero. ¡Usa esta opción con cuidado!</li>
+            <li><strong>Cambiar Tema (icono sol/luna):</strong> Alterna entre el modo claro y oscuro para tu comodidad visual.</li>
         </ul>
         
         <h3>Trabajando con Secuencias</h3>
         <p>Cada tarjeta representa una secuencia de tu proyecto. Puedes tener tantas como necesites.</p>
-        <h4>La Cabecera de la Secuencia</h4>
-        <p>En la parte superior de cada tarjeta de secuencia tienes varios controles:</p>
+        <h4>El Lienzo de Storyboard</h4>
+        <p>¡El corazón de la herramienta! Un lienzo para que dibujes los planos clave de tu secuencia.</p>
         <ul>
-          <li><strong>Título de la secuencia:</strong> Haz clic y escribe directamente para cambiar el nombre de la secuencia.</li>
-          <li><strong>Punto de Estado:</strong> Es el círculo de color. Haz clic sobre él para cambiar su color y marcar el estado de la secuencia (p. ej., Rojo: pendiente, Naranja: en progreso, Verde: completada). El ciclo es Blanco -> Rojo -> Naranja -> Verde -> Blanco.</li>
-          <li><strong>Flechas (Arriba/Abajo):</strong> Reordena las secuencias para cambiar el orden narrativo.</li>
-          <li><strong>Duplicar:</strong> Crea una copia exacta de la secuencia actual justo debajo de ella.</li>
-          <li><strong>Eliminar:</strong> Borra la secuencia permanentemente.</li>
+            <li>El color del pincel y del texto se adaptará automáticamente al tema claro/oscuro que estés usando.</li>
+            <li>Usa la barra de herramientas para seleccionar un útil: <strong>Pincel</strong>, <strong>Línea</strong>, <strong>Círculo</strong>, <strong>Texto</strong> o <strong>Borrador</strong>.</li>
+            <li>Ajusta el <strong>Grosor</strong> del trazo o el tamaño del texto con el deslizador.</li>
+            <li>El botón <strong>Limpiar</strong> borra todo el dibujo del lienzo.</li>
         </ul>
-        
-        <h4>Detalles de la Secuencia</h4>
-        <p>Dentro de cada secuencia, puedes añadir información detallada:</p>
-        <ul>
-          <li><strong>Localización:</strong> Escribe el nombre del lugar. Junto al campo, verás un icono de enlace.
-            <ul>
-              <li><strong>Clic izquierdo:</strong> Si no hay enlace, te pedirá añadir uno. Si ya existe, lo abrirá en una nueva pestaña.</li>
-              <li><strong>Clic derecho:</strong> Te permitirá editar el enlace existente o eliminarlo (dejando el campo en blanco).</li>
-            </ul>
-          </li>
-          <li><strong>Etiquetas:</strong> Escribe una o varias etiquetas (separadas por comas) y pulsa <strong>Enter</strong> para añadirlas. Son útiles para filtrar u organizar (p. ej., "Interior", "Diálogo", "B-Roll"). Haz clic en la <strong>&times;</strong> para eliminar una etiqueta.</li>
-        </ul>
-
-        <h4>Pestañas de Contenido</h4>
-        <p>Cada secuencia tiene tres pestañas para organizar diferentes tipos de información:</p>
-        <ol>
-          <li><strong>Descripción Escenas:</strong> Un campo de texto libre para detallar las escenas que componen la secuencia. Describe los planos, diálogos, acciones, atrezo, notas de dirección o cualquier detalle técnico.</li>
-          <li><strong>Referencias:</strong> Sube imágenes que te sirvan de inspiración visual. Puedes eliminar una imagen haciendo clic en la <strong>&times;</strong> que aparece sobre ella. <strong>¡Nuevo!</strong> Ahora puedes hacer clic en el nombre del archivo debajo de cada imagen para editarlo.</li>
-          <li><strong>Storyboard:</strong> ¡El corazón de la herramienta! Un lienzo para que dibujes los planos clave de tu secuencia.
-            <ul>
-                <li>Usa la barra de herramientas para seleccionar un útil: <strong>Pincel</strong>, <strong>Línea</strong>, <strong>Círculo</strong>, <strong>Texto</strong> o <strong>Borrador</strong>.</li>
-                <li>Ajusta el <strong>Grosor</strong> del trazo o el tamaño del texto con el deslizador.</li>
-                <li>El botón <strong>Limpiar</strong> borra todo el dibujo del lienzo.</li>
-            </ul>
-          </li>
-        </ol>
       </div>
     </div>
   </div>
