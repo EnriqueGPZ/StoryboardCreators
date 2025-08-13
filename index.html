@@ -255,7 +255,7 @@
         <div class="feature-item"><span class="material-symbols-rounded">layers</span><h3>Escaleta Detallada</h3><p>Organiza tu guion en una escaleta de secuencias. Añade notas, localizaciones y detalles de producción para cada escena.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">palette</span><h3>Dibujo Avanzado</h3><p>Usa herramientas como flechas, rectángulos y un selector de color para crear storyboards más detallados y expresivos.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">dark_mode</span><h3>Modo Oscuro</h3><p>Trabaja cómodamente en cualquier condición de luz con el nuevo tema oscuro, que cuida tu vista y tu concentración.</p></div>
-        <div class="feature-item"><span class="material-symbols-rounded">speed</span><h3>Rendimiento Optimizado</h3><p>Las imágenes se cargan de forma inteligente a medida que las necesitas, garantizando una experiencia fluida incluso en proyectos grandes.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">speed</span><h3>Rendimiento Optimizado</h3><p>Tus proyectos se cargan al instante y la interfaz es fluida, sin importar el tamaño de tu escaleta.</p></div>
       </div>
     </section>
 
@@ -628,7 +628,7 @@
       $('#author').addEventListener('input', async e => { state.author = e.target.value; await persist(); });
       $('#synopsis').addEventListener('input', async e => { state.synopsis = e.target.value; await persist(); });
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
-      $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Nueva Escaleta'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
+      $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Proyecto de Escaleta'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
       const pdfWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
@@ -933,17 +933,66 @@
         <span class="material-symbols-rounded help-modal-close" id="help-modal-close" title="Cerrar">&times;</span>
       </div>
       <div class="help-modal-content">
-        <h3>Trabajando con Secuencias</h3>
-        <p>Cada tarjeta representa una secuencia en tu escaleta. En la cabecera de cada una, ahora tienes un nuevo botón para <strong>descargar la imagen del storyboard</strong> de esa secuencia.</p>
+        <h3>Bienvenido a Escaleta Creator</h3>
+        <p>Esta es tu herramienta todo en uno para planificar proyectos audiovisuales. Desde la idea inicial hasta el guion gráfico, todo en un solo lugar.</p>
+        
+        <h3>Configuración del Proyecto</h3>
+        <p>En la parte superior de la aplicación encontrarás los campos principales de tu proyecto:</p>
+        <ul>
+          <li><strong>Título del proyecto:</strong> El nombre principal de tu obra. Se usará en las exportaciones.</li>
+          <li><strong>Autor:</strong> Tu nombre o el de tu equipo.</li>
+          <li><strong>Sinopsis:</strong> Un resumen de tu proyecto. Describe la idea, el público, el tono, etc.</li>
+        </ul>
 
-        <h4>Pestañas de Contenido</h4>
-        <p>La pestaña de <strong>Storyboard</strong> ahora es mucho más potente:</p>
-        <ol>
-          <li><strong>Nuevas Herramientas:</strong> Además del pincel, línea, círculo y texto, ahora puedes dibujar <strong>rectángulos</strong> y <strong>flechas</strong>.</li>
-          <li><strong>Selector de Color:</strong> A la derecha de la barra de herramientas del lienzo, encontrarás un círculo de color. Haz clic en él para elegir cualquier color para tus herramientas de dibujo.</li>
-          <li><strong>Exportación Individual:</strong> Al descargar un storyboard, podrás elegir entre <strong>PNG</strong> (calidad máxima) o <strong>JPEG</strong> (tamaño reducido). La imagen se exportará con el fondo del tema que estés usando.</li>
-          <li><strong>Tema Inteligente:</strong> El color de dibujo por defecto se ajustará automáticamente si cambias entre el modo claro y oscuro, pero respetará cualquier color personalizado que hayas elegido.</li>
-        </ol>
+        <h3>El Corazón de tu Escaleta: Las Secuencias</h3>
+        <p>Cada tarjeta en la aplicación es una <strong>secuencia</strong>. Aquí es donde desglosas tu historia. Cada secuencia tiene varias partes:</p>
+        
+        <h4>1. Cabecera de la Secuencia</h4>
+        <p>La barra superior de cada tarjeta te permite gestionar la secuencia:</p>
+        <ul>
+          <li><strong>Título de la secuencia:</strong> Haz clic para editarlo.</li>
+          <li><strong>Punto de Estado:</strong> Un círculo de color para saber el estado de la secuencia. Haz clic para cambiarlo (Gris -> Rojo -> Naranja -> Verde).</li>
+          <li><code>image</code>: Descarga el dibujo del storyboard de esta secuencia como un archivo de imagen (PNG o JPEG).</li>
+          <li><code>arrow_upward</code> / <code>arrow_downward</code>: Mueve la secuencia arriba o abajo.</li>
+          <li><code>content_copy</code>: Duplica la secuencia actual.</li>
+          <li><code>delete</code>: Elimina la secuencia (pide confirmación).</li>
+        </ul>
+        
+        <h4>2. Detalles de la Secuencia</h4>
+        <ul>
+            <li><strong>Localización:</strong> Dónde ocurre la escena. Puedes añadir un enlace (<code>link</code>) a Google Maps u otra URL. <strong>Consejo:</strong> Haz clic derecho en el icono del enlace para editarlo o eliminarlo.</li>
+            <li><strong>Etiquetas:</strong> Palabras clave para organizar. Escribe una o varias separadas por comas y pulsa Enter.</li>
+        </ul>
+        
+        <h4>3. Pestañas de Contenido</h4>
+        <ul>
+          <li><strong>Descripción Escenas:</strong> El núcleo de tu escaleta. Aquí escribes qué ocurre, diálogos, acciones, notas de cámara, etc.</li>
+          <li><strong>Referencias:</strong> Tu panel de inspiración. Sube imágenes de referencia para el ambiente, vestuario, etc.</li>
+          <li><strong>Storyboard:</strong> Un lienzo para dibujar tus planos.</li>
+        </ul>
+
+        <h3>El Lienzo del Storyboard: Dando Vida a tus Ideas</h3>
+        <p>La pestaña <strong>Storyboard</strong> es tu herramienta de guion gráfico. La barra de herramientas inferior te da todo lo que necesitas:</p>
+        <ul>
+          <li><strong>Herramientas de Dibujo:</strong> Pincel, Línea, Rectángulo, Círculo, Flecha, Texto y Borrador.</li>
+          <li><strong>Controles:</strong> Ajusta el <strong>Grosor</strong> de la línea con el deslizador y elige cualquier <strong>Color</strong> con el selector.</li>
+          <li><code>add_photo_alternate</code>: <strong>Añadir a Referencias</strong>. Esta potente función guarda una copia del dibujo actual en la pestaña de Referencias. Perfecto para guardar versiones o planos clave sin salir del lienzo.</li>
+          <li><strong>Limpiar:</strong> Borra todo el lienzo.</li>
+        </ul>
+
+        <h3>La Barra de Herramientas Principal</h3>
+        <p>La barra superior que te sigue por la página contiene las acciones globales del proyecto:</p>
+        <ul>
+            <li><code>add</code>: <strong>Añadir nueva secuencia</strong> al final de tu escaleta.</li>
+            <li><code>picture_as_pdf</code>: <strong>Exportar a PDF</strong>. Genera un documento profesional con toda tu escaleta, incluyendo textos e imágenes.</li>
+            <li><code>archive</code>: <strong>Exportar a ZIP</strong>. Crea una copia de seguridad completa de tu proyecto que puedes guardar o mover a otro ordenador.</li>
+            <li><code>unarchive</code>: <strong>Importar desde ZIP</strong>. Carga un proyecto previamente exportado. <strong>¡Cuidado!</strong> Reemplazará el proyecto actual.</li>
+            <li><code>delete_sweep</code>: <strong>Vaciar Proyecto</strong>. Elimina todo y empieza de cero.</li>
+            <li><code>dark_mode</code> / <code>light_mode</code>: Cambia entre el tema claro y oscuro.</li>
+        </ul>
+
+        <h3>Tus Datos, Tu Control</h3>
+        <p><strong>Escaleta Creator</strong> respeta tu privacidad. Todo tu trabajo se guarda <strong>localmente en tu navegador</strong>. Nadie más tiene acceso. Para trabajar en otro dispositivo o tener una copia de seguridad, usa siempre las funciones de <strong>Exportar e Importar a ZIP</strong>.</p>
       </div>
     </div>
   </div>
