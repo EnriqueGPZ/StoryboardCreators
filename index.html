@@ -23,6 +23,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
   
   <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+  <!-- AÑADIDA LIBRERÍA JSZIP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   
   <script type="application/ld+json">
   {
@@ -38,7 +40,7 @@
           "price": "0",
           "priceCurrency": "USD"
         },
-        "description": "Una herramienta online y gratuita para crear storyboards detallados, planificar secuencias, añadir notas, referencias visuales y exportar a PDF y JSON. Diseñada para creadores de contenido, cineastas y educadores.",
+        "description": "Una herramienta online y gratuita para crear storyboards detallados, planificar secuencias, añadir notas, referencias visuales y exportar a PDF y ZIP. Diseñada para creadores de contenido, cineastas y educadores.",
         "url": "https://[TU-URL-AQUI.com]/final.html"
       },
       {
@@ -65,7 +67,7 @@
             "name": "¿Puedo usar mis proyectos en otro ordenador?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Sí. Puedes usar la función 'Exportar a JSON' para guardar una copia de seguridad de tu proyecto como un archivo. Luego, en otro ordenador, puedes usar 'Importar desde JSON' para cargar y continuar trabajando en tu proyecto."
+              "text": "Sí. Puedes usar la función 'Exportar a ZIP' para guardar una copia de seguridad de tu proyecto como un archivo .zip. Este archivo contiene tus datos y todas las imágenes. Luego, en otro ordenador, puedes usar 'Importar desde ZIP' para cargar y continuar trabajando en tu proyecto."
             }
           }
         ]
@@ -247,7 +249,7 @@
         <div class="feature-item"><span class="material-symbols-rounded">layers</span><h3>Planificación por Secuencias</h3><p>Organiza tu guion en secuencias. Cada secuencia puede contener una o varias escenas detalladas en su descripción.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">draw</span><h3>Storyboard Integrado</h3><p>Dibuja tus planos directamente en la aplicación con nuestro lienzo digital. Una forma visual y rápida de plasmar tus ideas.</p></div>
         <div class="feature-item"><span class="material-symbols-rounded">collections</span><h3>Referencias Visuales</h3><p>Sube imágenes de referencia para inspiración de estilo, paletas de color, localizaciones o ejemplos de planos.</p></div>
-        <div class="feature-item"><span class="material-symbols-rounded">link</span><h3>Enlaces de Localización</h3><p>Añade URLs a tus localizaciones para un acceso rápido a Google Maps, webs de estudios o cualquier referencia online.</p></div>
+        <div class="feature-item"><span class="material-symbols-rounded">archive</span><h3>Exportación ZIP</h3><p>Guarda todo tu proyecto, datos e imágenes, en un único y práctico archivo .zip para copias de seguridad o para moverlo a otro equipo.</p></div>
       </div>
     </section>
 
@@ -256,8 +258,9 @@
         <div class="toolbar">
           <button class="btn primary" id="btn-add" title="Añadir nueva secuencia"><span class="material-symbols-rounded">add</span></button>
           <button class="btn alt" id="btn-export-pdf" title="Exportar a PDF"><span class="material-symbols-rounded">picture_as_pdf</span></button>
-          <button class="btn alt" id="btn-export-json" title="Exportar a JSON"><span class="material-symbols-rounded">data_object</span></button>
-          <label class="btn alt" title="Importar desde JSON"><span class="material-symbols-rounded">upload_file</span><input id="import-json" type="file" accept="application/json" hidden /></label>
+          <!-- BOTONES MODIFICADOS PARA ZIP -->
+          <button class="btn alt" id="btn-export-zip" title="Exportar a ZIP"><span class="material-symbols-rounded">archive</span></button>
+          <label class="btn alt" title="Importar desde ZIP"><span class="material-symbols-rounded">unarchive</span><input id="import-zip" type="file" accept="application/zip" hidden /></label>
           <button class="btn red" id="btn-clear" title="Vaciar proyecto"><span class="material-symbols-rounded">delete_sweep</span></button>
           <button class="btn alt" id="btn-help" title="Ayuda"><span class="material-symbols-rounded">help</span></button>
         </div>
@@ -277,7 +280,8 @@
         <div class="faq-container">
             <details><summary>¿Es esta herramienta realmente gratuita?</summary><div class="answer">Sí, 'Storyboard for Creators' es completamente gratuita. No hay funciones de pago ni suscripciones. Todos los datos se guardan localmente en tu propio navegador.</div></details>
             <details><summary>¿Dónde se guardan mis datos?</summary><div class="answer">Tus proyectos se guardan de forma segura en el almacenamiento de tu navegador (usando IndexedDB). Esto significa que son privados y solo accesibles desde el dispositivo y navegador que utilizas. Nadie más puede verlos.</div></details>
-            <details><summary>¿Puedo usar mis proyectos en otro ordenador?</summary><div class="answer">Sí. Puedes usar la función 'Exportar a JSON' para guardar una copia de seguridad de tu proyecto como un archivo. Luego, en otro ordenador, puedes usar 'Importar desde JSON' para cargar y continuar trabajando en tu proyecto.</div></details>
+            <!-- PREGUNTA MODIFICADA PARA ZIP -->
+            <details><summary>¿Puedo usar mis proyectos en otro ordenador?</summary><div class="answer">Sí. Puedes usar la función 'Exportar a ZIP' para guardar una copia de seguridad completa de tu proyecto (datos e imágenes) como un archivo <code>.zip</code>. Luego, en otro ordenador, puedes usar 'Importar desde ZIP' para cargar y continuar trabajando en tu proyecto.</div></details>
         </div>
     </section>
 
@@ -303,7 +307,6 @@
       let objectURLs = [];
 
       const blobToDataURL = (blob) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
-      const dataURLToBlob = (dataurl) => { const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]); let n = bstr.length; const u8arr = new Uint8Array(n); while(n--){ u8arr[n] = bstr.charCodeAt(n); } return new Blob([u8arr], {type:mime}); }
       const getCanvasBlob = (canvas) => new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       const fileToBlob = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(new Blob([reader.result], {type: file.type})); reader.onerror = reject; reader.readAsArrayBuffer(file); });
 
@@ -345,20 +348,14 @@
         
         const statusDot = $('.status-dot', el);
         const colorCycle = [null, 'red', 'orange', 'green'];
-        if (scene.statusColor) {
-            statusDot.classList.add(scene.statusColor);
-        }
-        statusDot.onclick = async () => {
-            const currentIndex = colorCycle.indexOf(scene.statusColor);
-            const nextIndex = (currentIndex + 1) % colorCycle.length;
-            scene.statusColor = colorCycle[nextIndex];
-            await updateAndRender();
-        };
+        if (scene.statusColor) { statusDot.classList.add(scene.statusColor); }
+        statusDot.onclick = async () => { const currentIndex = colorCycle.indexOf(scene.statusColor); const nextIndex = (currentIndex + 1) % colorCycle.length; scene.statusColor = colorCycle[nextIndex]; await updateAndRender(); };
 
         const tabs = $$('.tab', el);
         tabs.forEach(tab => { tab.onclick = () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); $$('.tab-content', el).forEach(c => c.classList.toggle('active', c.dataset.content === tab.dataset.tab)); }; });
         if (scene.refs && scene.refs.length > 0) $('.tab[data-tab="refs"]', el).classList.add('has-content');
         if (scene.sketch) $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
+        
         const tagsContainer = $('.tags-container', el);
         const tagsInput = $('.inp-tags', el);
         function drawTags() { tagsContainer.innerHTML = ''; (scene.tags || []).forEach(tag => { const tagEl = document.createElement('span'); tagEl.className = 'chip'; tagEl.innerHTML = `${escapeHtml(tag)} <span class="remove-tag" title="Quitar">&times;</span>`; $('.remove-tag', tagEl).onclick = async () => { scene.tags = scene.tags.filter(t => t !== tag); drawTags(); await update(); }; tagsContainer.appendChild(tagEl); }); }
@@ -371,50 +368,15 @@
         
         function drawThumbs() { 
           thumbs.innerHTML = ''; 
-          if (!scene.refs.length) { 
-            thumbs.innerHTML = '<div style="color:var(--muted); font-size:12px;">Sube imágenes para verlas aquí.</div>'; 
-            return; 
-          } 
+          if (!scene.refs.length) { thumbs.innerHTML = '<div style="color:var(--muted); font-size:12px;">Sube imágenes para verlas aquí.</div>'; return; } 
           scene.refs.forEach(r => { 
-            const t = document.createElement('div'); 
-            t.className = 'thumb'; 
-            
-            t.innerHTML = `
-              <img alt="${escapeHtml(r.name)}"/>
-              <div class="thumb-name-wrapper">
-                  <p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar el nombre">${escapeHtml(r.name)}</p>
-              </div>
-              <div class="x" title="Quitar imagen">&times;</div>`;
-
-            if (r.data instanceof Blob) { 
-              const url = URL.createObjectURL(r.data); 
-              $('img', t).src = url; 
-              objectURLs.push(url); 
-            }
-            
-            $('.x', t).onclick = async () => { 
-              scene.refs = scene.refs.filter(x => x.id !== r.id); 
-              await updateAndRender(); 
-            };
-            
+            const t = document.createElement('div'); t.className = 'thumb'; 
+            t.innerHTML = `<img alt="${escapeHtml(r.name)}"/><div class="thumb-name-wrapper"><p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar el nombre">${escapeHtml(r.name)}</p></div><div class="x" title="Quitar imagen">&times;</div>`;
+            if (r.data instanceof Blob) { const url = URL.createObjectURL(r.data); $('img', t).src = url; objectURLs.push(url); }
+            $('.x', t).onclick = async () => { scene.refs = scene.refs.filter(x => x.id !== r.id); await updateAndRender(); };
             const nameEl = $('.thumb-name', t);
-            nameEl.addEventListener('keydown', e => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                e.target.blur();
-              }
-            });
-            nameEl.addEventListener('blur', async () => {
-              const newName = nameEl.textContent.trim();
-              if (newName && r.name !== newName) {
-                r.name = newName;
-                $('img', t).alt = newName;
-                await update();
-              } else {
-                nameEl.textContent = r.name; // Revertir si está vacío
-              }
-            });
-            
+            nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+            nameEl.addEventListener('blur', async () => { const newName = nameEl.textContent.trim(); if (newName && r.name !== newName) { r.name = newName; $('img', t).alt = newName; await update(); } else { nameEl.textContent = r.name; } });
             thumbs.appendChild(t); 
           }); 
         }
@@ -426,127 +388,35 @@
         const sizeInput = $('.size', el);
         if (scene.sketch instanceof Blob) loadImageToCanvas(scene.sketch, canvas, ctx);
         
-        let activeTool = 'draw';
-        let isDrawing = false;
-        let startPos = null;
-        let lastPos = null;
-        let savedCanvasState = null;
-
+        let activeTool = 'draw', isDrawing = false, startPos = null, lastPos = null, savedCanvasState = null;
         const getPos = (e) => getXY(e, canvas);
-
         const drawFinalShape = (start, end) => {
-            ctx.lineWidth = +sizeInput.value;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#000000';
-            ctx.globalCompositeOperation = 'source-over';
-            
-            ctx.beginPath();
-            if (activeTool === 'line') {
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-            } else if (activeTool === 'circle') {
-                const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-                ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
-            }
+            ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = '#000000'; ctx.globalCompositeOperation = 'source-over'; ctx.beginPath();
+            if (activeTool === 'line') { ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); } 
+            else if (activeTool === 'circle') { const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)); ctx.arc(start.x, start.y, radius, 0, Math.PI * 2); }
             ctx.stroke();
         };
-
         const startDrawing = (e) => {
-          e.preventDefault();
-          const posEvent = e.touches ? e.touches[0] : e;
-          
-          if (activeTool === 'text') {
-            const text = prompt('Escribe el texto que quieres añadir:', '');
-            if (text) {
-              const pos = getPos(posEvent);
-              ctx.font = `${+sizeInput.value * 3}px Roboto`;
-              ctx.fillStyle = '#000000';
-              ctx.globalCompositeOperation = 'source-over';
-              ctx.fillText(text, pos.x, pos.y);
-              (async () => {
-                scene.sketch = await getCanvasBlob(canvas);
-                await update();
-                $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
-              })();
-            }
-            return;
-          }
-
-          isDrawing = true;
-          startPos = getPos(posEvent);
-          lastPos = startPos;
-          
-          if (activeTool === 'line' || activeTool === 'circle') {
-             savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          }
+          e.preventDefault(); const posEvent = e.touches ? e.touches[0] : e;
+          if (activeTool === 'text') { const text = prompt('Escribe el texto que quieres añadir:', ''); if (text) { const pos = getPos(posEvent); ctx.font = `${+sizeInput.value * 3}px Roboto`; ctx.fillStyle = '#000000'; ctx.globalCompositeOperation = 'source-over'; ctx.fillText(text, pos.x, pos.y); (async () => { scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content'); })(); } return; }
+          isDrawing = true; startPos = getPos(posEvent); lastPos = startPos;
+          if (activeTool === 'line' || activeTool === 'circle') { savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height); }
         };
-
         const draw = (e) => {
-          if (!isDrawing) return;
-          e.preventDefault();
-          const posEvent = e.touches ? e.touches[0] : e;
-          const currentPos = getPos(posEvent);
-
-          if (activeTool === 'draw' || activeTool === 'erase') {
-              ctx.lineWidth = +sizeInput.value;
-              ctx.lineCap = 'round';
-              ctx.strokeStyle = '#000000';
-              ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over';
-              
-              ctx.beginPath();
-              ctx.moveTo(lastPos.x, lastPos.y);
-              ctx.lineTo(currentPos.x, currentPos.y);
-              ctx.stroke();
-              lastPos = currentPos;
-          } else if (savedCanvasState) {
-             ctx.putImageData(savedCanvasState, 0, 0);
-             drawFinalShape(startPos, currentPos);
-          }
+          if (!isDrawing) return; e.preventDefault(); const posEvent = e.touches ? e.touches[0] : e; const currentPos = getPos(posEvent);
+          if (activeTool === 'draw' || activeTool === 'erase') { ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = '#000000'; ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over'; ctx.beginPath(); ctx.moveTo(lastPos.x, lastPos.y); ctx.lineTo(currentPos.x, currentPos.y); ctx.stroke(); lastPos = currentPos; } 
+          else if (savedCanvasState) { ctx.putImageData(savedCanvasState, 0, 0); drawFinalShape(startPos, currentPos); }
         };
-        
         const endDrawing = async (e) => {
-            if (!isDrawing) return;
-            e.preventDefault();
-            const posEvent = e.changedTouches ? e.changedTouches[0] : e;
-            
-            if ((activeTool === 'line' || activeTool === 'circle') && savedCanvasState) {
-                ctx.putImageData(savedCanvasState, 0, 0);
-                drawFinalShape(startPos, getPos(posEvent));
-            }
-            
-            isDrawing = false;
-            savedCanvasState = null;
-            scene.sketch = await getCanvasBlob(canvas);
-            await update();
-            $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
+            if (!isDrawing) return; e.preventDefault(); const posEvent = e.changedTouches ? e.changedTouches[0] : e;
+            if ((activeTool === 'line' || activeTool === 'circle') && savedCanvasState) { ctx.putImageData(savedCanvasState, 0, 0); drawFinalShape(startPos, getPos(posEvent)); }
+            isDrawing = false; savedCanvasState = null; scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
         };
 
-        // Eventos de Ratón
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', endDrawing);
-        canvas.addEventListener('mouseleave', endDrawing);
-
-        // Eventos Táctiles para compatibilidad con móviles y tabletas
-        canvas.addEventListener('touchstart', startDrawing, { passive: false });
-        canvas.addEventListener('touchmove', draw, { passive: false });
-        canvas.addEventListener('touchend', endDrawing);
-        canvas.addEventListener('touchcancel', endDrawing);
-
-        $$('.btn[data-tool]', controls).forEach(btn => {
-            btn.onclick = () => {
-                activeTool = btn.dataset.tool;
-                $$('.btn[data-tool]', controls).forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            };
-        });
-        
-        $('.clear', controls).onclick = async () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            scene.sketch = null;
-            await update(); 
-            $('.tab[data-tab="storyboard"]', el).classList.remove('has-content');
-        };
+        canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', endDrawing); canvas.addEventListener('mouseleave', endDrawing);
+        canvas.addEventListener('touchstart', startDrawing, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); canvas.addEventListener('touchend', endDrawing); canvas.addEventListener('touchcancel', endDrawing);
+        $$('.btn[data-tool]', controls).forEach(btn => { btn.onclick = () => { activeTool = btn.dataset.tool; $$('.btn[data-tool]', controls).forEach(b => b.classList.remove('active')); btn.classList.add('active'); }; });
+        $('.clear', controls).onclick = async () => { ctx.clearRect(0, 0, canvas.width, canvas.height); scene.sketch = null; await update(); $('.tab[data-tab="storyboard"]', el).classList.remove('has-content'); };
 
         return el;
       }
@@ -572,49 +442,108 @@
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Mi Nuevo Proyecto'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
-      // --- CÓDIGO CORREGIDO PARA EXPORTAR JSON ---
-      $('#btn-export-json').onclick = () => showDialog({ 
-        title: 'Exportar a JSON', 
-        message: 'Se generará un archivo .json con todo tu proyecto. El proceso puede tardar si hay muchas imágenes.', 
-        confirmText: 'Exportar', 
-        onConfirm: async () => {
-          // 1. Crea una copia del estado para no modificar el original en vivo
-          const stateForExport = JSON.parse(JSON.stringify(state));
+      // --- NUEVA LÓGICA DE EXPORTACIÓN A ZIP ---
+      $('#btn-export-zip').onclick = () => showDialog({
+          title: 'Exportar a ZIP',
+          message: 'Se generará un archivo .zip con tu proyecto y todas las imágenes. Este proceso puede tardar unos segundos.',
+          confirmText: 'Exportar',
+          onConfirm: async () => {
+              const zip = new JSZip();
+              const assetsFolder = zip.folder("assets");
+              const stateForExport = JSON.parse(JSON.stringify(state));
 
-          // 2. Itera sobre el estado ORIGINAL y la COPIA simultáneamente
-          for (let i = 0; i < state.scenes.length; i++) {
-            const originalScene = state.scenes[i];
-            const exportScene = stateForExport.scenes[i];
+              for (let i = 0; i < state.scenes.length; i++) {
+                  const scene = state.scenes[i];
+                  const exportScene = stateForExport.scenes[i];
 
-            // 3. Convierte el `sketch` si existe
-            if (originalScene.sketch instanceof Blob) {
-              exportScene.sketch = await blobToDataURL(originalScene.sketch);
-            }
-
-            // 4. Convierte las imágenes de referencia si existen
-            if (originalScene.refs && originalScene.refs.length) {
-              for (let j = 0; j < originalScene.refs.length; j++) {
-                const originalRef = originalScene.refs[j];
-                const exportRef = exportScene.refs[j];
-                if (originalRef.data instanceof Blob) {
-                  exportRef.data = await blobToDataURL(originalRef.data);
-                }
+                  if (scene.sketch instanceof Blob) {
+                      const filename = `sketch-${scene.id}.png`;
+                      assetsFolder.file(filename, scene.sketch);
+                      exportScene.sketch = `assets/${filename}`;
+                  }
+                  if (scene.refs && scene.refs.length) {
+                      for (let j = 0; j < scene.refs.length; j++) {
+                          const ref = scene.refs[j];
+                          const exportRef = exportScene.refs[j];
+                          if (ref.data instanceof Blob) {
+                              const extension = ref.data.type.split('/')[1] || 'png';
+                              const filename = `ref-${scene.id}-${ref.id}.${extension}`;
+                              assetsFolder.file(filename, ref.data);
+                              exportRef.data = `assets/${filename}`;
+                          }
+                      }
+                  }
               }
-            }
+              zip.file("project.json", JSON.stringify(stateForExport, null, 2));
+              const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
+              
+              const a = document.createElement('a');
+              a.href = URL.createObjectURL(zipBlob);
+              a.download = `${slug(state.title || 'proyecto')}.zip`;
+              a.click();
+              URL.revokeObjectURL(a.href);
           }
-
-          // 5. Ahora sí, crea el Blob JSON con los datos correctos y descárgalo
-          const blob = new Blob([JSON.stringify(stateForExport, null, 2)], { type: 'application/json' }); 
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = `${slug(state.title || 'proyecto')}.json`;
-          a.click();
-          URL.revokeObjectURL(a.href);
-        }
       });
-      // --- FIN DEL CÓDIGO CORREGIDO ---
 
-      $('#import-json').onchange = async (e) => { const f = e.target.files?.[0]; if (!f) return; try { const txt = await f.text(); const data = JSON.parse(txt); if (!data || typeof data.title !== 'string' || !Array.isArray(data.scenes)) { throw new Error('Formato JSON inválido.'); } showDialog({ title: 'Importar Proyecto', message: 'Se han detectado datos de imágenes. La conversión puede tardar unos segundos. ¿Deseas continuar?', confirmText: 'Importar', onConfirm: async () => { for (const scene of data.scenes) { if (typeof scene.sketch === 'string' && scene.sketch.startsWith('data:image')) { scene.sketch = dataURLToBlob(scene.sketch); } if (scene.refs) { for (const ref of scene.refs) { if (typeof ref.data === 'string' && ref.data.startsWith('data:image')) { ref.data = dataURLToBlob(ref.data); } } } } state = data; state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); await persist(); render(); } }); } catch (err) { alert('Error al importar el archivo.\n\n' + err.message); } e.target.value = ''; };
+      // --- NUEVA LÓGICA DE IMPORTACIÓN DESDE ZIP ---
+      $('#import-zip').onchange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        showDialog({
+            title: 'Importar Proyecto desde ZIP',
+            message: 'Esto reemplazará tu proyecto actual. ¿Estás seguro de que quieres continuar?',
+            confirmText: 'Sí, importar',
+            onConfirm: async () => {
+                try {
+                    const zip = await JSZip.loadAsync(file);
+                    const projectFile = zip.file("project.json");
+                    if (!projectFile) throw new Error("El archivo project.json no se encontró en el ZIP.");
+
+                    const jsonText = await projectFile.async("string");
+                    const data = JSON.parse(jsonText);
+
+                    const loadingPromises = [];
+                    for (const scene of data.scenes) {
+                        if (typeof scene.sketch === 'string') {
+                            const sketchFile = zip.file(scene.sketch);
+                            if(sketchFile) {
+                                loadingPromises.push(
+                                    sketchFile.async("blob").then(blob => { scene.sketch = blob; })
+                                );
+                            }
+                        }
+                        if (scene.refs) {
+                            for (const ref of scene.refs) {
+                                if (typeof ref.data === 'string') {
+                                    const refFile = zip.file(ref.data);
+                                    if(refFile) {
+                                        loadingPromises.push(
+                                            refFile.async("blob").then(blob => { ref.data = blob; })
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    await Promise.all(loadingPromises);
+                    
+                    state = data;
+                    state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; });
+                    await persist();
+                    render();
+
+                } catch (err) {
+                    alert('Error al importar el archivo ZIP.\n\n' + err.message);
+                } finally {
+                    e.target.value = '';
+                }
+            }
+        });
+      };
+      
+      // La exportación a PDF se mantiene igual, no se ve afectada
       $('#btn-export-pdf').onclick = () => showDialog({ title: 'Exportar a PDF', message: 'Se generará un archivo PDF de tu proyecto. El proceso puede ser lento si hay muchas imágenes.', confirmText: 'Generar PDF', onConfirm: async () => { const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: 'pt', format: 'a4' }); const MARGIN = 50; const pageW = doc.internal.pageSize.getWidth(); const pageH = doc.internal.pageSize.getHeight(); let y = MARGIN + 20; doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(state.title || 'Proyecto de Storyboard', MARGIN, y); y += 40; doc.setFont('helvetica', 'normal'); doc.setFontSize(12); if (state.author) { doc.text(`Autor: ${state.author}`, MARGIN, y); y += 20; } doc.setFontSize(10); doc.text(`Total de secuencias: ${state.scenes.length}`, MARGIN, y); y += 15; doc.text(`Generado el: ${new Date().toLocaleDateString()}`, MARGIN, y); y += 35; if (state.synopsis) { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Sinopsis del Proyecto', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); const synopsisLines = doc.splitTextToSize(state.synopsis, pageW - MARGIN * 2); doc.text(synopsisLines, MARGIN, y); } for (let i = 0; i < state.scenes.length; i++) { doc.addPage(); const s = state.scenes[i]; y = MARGIN; if (s.statusColor) { const colorVar = getComputedStyle(document.documentElement).getPropertyValue(`--${s.statusColor}`).trim(); doc.setFillColor(colorVar); doc.rect(0, 0, pageW, MARGIN - 20, 'F'); } doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(`SECUENCIA ${i + 1}: ${s.title || 'Sin título'}`, MARGIN, y); y += 30; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); if (s.location) { doc.text(`Localización: ${s.location}`, MARGIN, y); y += 15; } if(s.locationURL) { doc.setTextColor(0, 0, 238); doc.textWithLink(s.locationURL, MARGIN, y, { url: s.locationURL }); doc.setTextColor(0, 0, 0); y += 20; } else { y+= 5; } if (s.tags && s.tags.length > 0) { const tagsText = `Etiquetas: ${s.tags.join(', ')}`; const tagsLines = doc.splitTextToSize(tagsText, pageW - MARGIN * 2); doc.text(tagsLines, MARGIN, y); y += tagsLines.length * 14 + 10; } if (s.description) { if (y > pageH - MARGIN - 60) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Descripción Escenas', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const lines = doc.splitTextToSize(s.description, pageW - MARGIN * 2); doc.text(lines, MARGIN, y); y += lines.length * 14 + 25; } if (s.sketch instanceof Blob) { const w = pageW - MARGIN * 2; const h = w * 9 / 16; if (y + h > pageH - MARGIN) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Storyboard', MARGIN, y); y += 18; const sketchData = await blobToDataURL(s.sketch); doc.addImage(sketchData, 'PNG', MARGIN, y, w, h); y += h + 25; doc.setFont('helvetica', 'normal'); } if (s.refs && s.refs.length) { if (y > pageH - MARGIN - 80) { doc.addPage(); y = MARGIN; } doc.setFont('helvetica', 'bold'); doc.text('Referencias', MARGIN, y); y += 18; doc.setFont('helvetica', 'normal'); const imgs = s.refs.slice(0, 6); const cols = 3, gap = 10; const imgW = (pageW - MARGIN * 2 - gap * (cols - 1)) / cols; const imgH = imgW * 9 / 16; let currentX = MARGIN; let currentY = y; for (let k = 0; k < imgs.length; k++) { const ref = imgs[k]; if (currentY + imgH > pageH - MARGIN) { doc.addPage(); y = MARGIN; currentY = y; } const col = k % cols; currentX = MARGIN + col * (imgW + gap); if (ref.data instanceof Blob) { try { const refData = await blobToDataURL(ref.data); doc.addImage(refData, 'JPEG', currentX, currentY, imgW, imgH, undefined, 'FAST'); } catch (e) { console.error("Error al añadir imagen a PDF: ", e); doc.text('Error img', currentX, currentY); } } if (col === cols - 1 || k === imgs.length - 1) { currentY += imgH + gap; } } y = currentY; } } doc.save(`${slug(state.title || 'proyecto')}.pdf`); } });
       
       function swap(arr, i, j) { const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
@@ -653,9 +582,9 @@
         <h4>Barra de Herramientas Principal</h4>
         <ul>
           <li><strong>Añadir nueva secuencia (+):</strong> Crea una nueva tarjeta de secuencia en blanco al final de tu proyecto.</li>
-          <li><strong>Exportar a PDF:</strong> Genera un documento PDF profesional con todo tu storyboard, listo para imprimir o compartir. Incluye una barra de color en cada página si has asignado un estado.</li>
-          <li><strong>Exportar a JSON:</strong> Guarda una copia de seguridad completa de tu proyecto en un archivo <code>.json</code>. Es la mejor forma de guardar tu trabajo o moverlo a otro ordenador.</li>
-          <li><strong>Importar desde JSON:</strong> Carga un proyecto previamente guardado desde un archivo <code>.json</code>.</li>
+          <li><strong>Exportar a PDF:</strong> Genera un documento PDF profesional con todo tu storyboard, listo para imprimir o compartir.</li>
+          <li><strong>Exportar a ZIP:</strong> Guarda una copia de seguridad completa de tu proyecto, incluyendo todas las imágenes, en un archivo <code>.zip</code>. Es la mejor forma de guardar tu trabajo o moverlo a otro ordenador.</li>
+          <li><strong>Importar desde ZIP:</strong> Carga un proyecto previamente guardado desde un archivo <code>.zip</code>.</li>
           <li><strong>Vaciar proyecto:</strong> Elimina todo el contenido y empieza de cero. ¡Usa esta opción con cuidado!</li>
         </ul>
         
