@@ -398,7 +398,9 @@
         el.className = 'scene';
         el.dataset.id = scene.id;
         
-        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia, el corazón de tu escaleta. Describe planos, diálogos, acciones, atrezo, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
+        // --- START: HTML Template Update ---
+        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia, el corazón de tu escaleta. Describe planos, diálogos, acciones, atrezo, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn alt btn-add-to-refs" title="Añadir a Referencias" style="margin-left: 8px;"><span class="material-symbols-rounded">add_photo_alternate</span></button> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
+        // --- END: HTML Template Update ---
         
         const updateAndRender = async () => { await persist(); render(); };
         const update = async () => { await persist(); };
@@ -554,6 +556,24 @@
         $$('.btn[data-tool]', controls).forEach(btn => { btn.onclick = () => { activeTool = btn.dataset.tool; $$('.btn[data-tool]', controls).forEach(b => b.classList.remove('active')); btn.classList.add('active'); }; });
         $('.clear', controls).onclick = async () => { ctx.clearRect(0, 0, canvas.width, canvas.height); scene.sketch = null; await update(); $('.tab[data-tab="storyboard"]', el).classList.remove('has-content'); };
         
+        // --- START: New Button Logic ---
+        $('.btn-add-to-refs', el).onclick = async () => {
+          if (!scene.sketch) {
+            alert('El storyboard está vacío. Dibuja algo antes de añadirlo a las referencias.');
+            return;
+          }
+          const blob = await getCanvasBlob(canvas);
+          const newRef = {
+            id: uid(),
+            name: `Storyboard Shot - ${new Date().toLocaleTimeString()}.png`,
+            data: blob
+          };
+          if (!scene.refs) { scene.refs = []; }
+          scene.refs.push(newRef);
+          await updateAndRender();
+        };
+        // --- END: New Button Logic ---
+
         return el;
       }
       
@@ -621,7 +641,6 @@
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Mi Nuevo Proyecto'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
-      // ---------- START: NEW, SIMPLIFIED & ROBUST PDF WORKER SCRIPT ----------
       const pdfWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
 
@@ -700,8 +719,7 @@
                         y += 20;
                         const imgHeight = CONTENT_W * 9 / 16;
                         try {
-                            // The Fix: Let jsPDF detect the format. Do NOT specify 'PNG'.
-                            doc.addImage(scene.sketch, MARGIN, y, CONTENT_W, imgHeight);
+                            doc.addImage(scene.sketch, undefined, MARGIN, y, CONTENT_W, imgHeight);
                             y += imgHeight + 20;
                         } catch (err) {
                             doc.text('Error: No se pudo añadir la imagen del storyboard.', MARGIN, y);
@@ -722,8 +740,7 @@
                         for (let j = 0; j < refs.length; j++) {
                             const x = MARGIN + (j % 2) * (imgWidth + 10);
                             try {
-                                // The Fix: Let jsPDF detect the format. Do NOT specify 'JPEG'.
-                                doc.addImage(refs[j].data, x, y, imgWidth, imgHeight);
+                                doc.addImage(refs[j].data, undefined, x, y, imgWidth, imgHeight);
                             } catch(err) {
                                 doc.text('Error img.', x, y);
                             }
@@ -743,9 +760,7 @@
             }
         };
       `;
-      // ---------- END: NEW PDF WORKER SCRIPT ----------
-
-
+      
       const zipWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
         self.onmessage = async (e) => {
