@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
-  <title>Escaleta Creators - Crea Escaletas y Storyboards Online</title>
+  <title>Escaleta Creator - Crea Escaletas y Storyboards Online</title>
   
   <meta name="description" content="Crea tu escaleta y storyboard profesional con Escaleta Creator. La herramienta online y gratuita para planificar tus vídeos, guiones y proyectos creativos. Organiza secuencias, notas y referencias visuales fácilmente.">
   <meta name="keywords" content="escaleta, creador de escaleta, escaleta para video, escaleta audiovisual, storyboard online, creador de storyboard, Escaleta Creator, herramienta para youtubers, planificador de vídeo, guion gráfico, storyboard gratis, video planner, storyboard creator">
@@ -31,7 +31,7 @@
     "@graph": [
       {
         "@type": "SoftwareApplication",
-        "name": "Escaleta Creators",
+        "name": "Escaleta Creator",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Web",
         "offers": {
@@ -302,7 +302,8 @@
     document.addEventListener('DOMContentLoaded', async () => {
       const $ = (sel, p = document) => p.querySelector(sel);
       const $$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
-      const uid = () => Math.random().toString(36).slice(2);
+      // CORRECCIÓN: UID más robusto para evitar colisiones.
+      const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
       
       const themeToggle = $('#btn-theme-toggle');
       const themeIcon = $('span', themeToggle);
@@ -351,26 +352,7 @@
       async function loadInitialState() { try { const savedState = await db.project.get(PROJECT_ID); if (savedState) { delete savedState.id; Object.assign(state, savedState); state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); } } catch (error) { console.error("Error al cargar desde IndexedDB:", error); } }
       function revokeObjectURLs() { objectURLs.forEach(url => URL.revokeObjectURL(url)); objectURLs = []; }
 
-      const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const el = entry.target;
-            const canvas = $('canvas[data-src]', el);
-            if (canvas) {
-              const url = canvas.dataset.src;
-              const ctx = canvas.getContext('2d');
-              const image = new Image();
-              image.onload = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-              };
-              image.src = url;
-              canvas.removeAttribute('data-src');
-            }
-            observer.unobserve(el);
-          }
-        });
-      }, { rootMargin: '200px' });
+      // CORRECCIÓN: Se ha eliminado el IntersectionObserver (lazyLoadObserver) para un manejo de imágenes más robusto y simple.
 
       function render() {
         revokeObjectURLs();
@@ -382,7 +364,7 @@
         state.scenes.forEach((s, i) => {
           const sceneEl = renderScene(s, i);
           wrap.appendChild(sceneEl);
-          lazyLoadObserver.observe(sceneEl);
+          // CORRECCIÓN: Ya no se observa el elemento para lazy loading.
         });
       }
       
@@ -459,10 +441,17 @@
         const sizeInput = $('.size', el);
         const colorPicker = $('.color-picker', el);
         colorPicker.value = document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000';
+        
+        // CORRECCIÓN: Se dibuja directamente el contenido del storyboard sin usar data-src.
         if (scene.sketch instanceof Blob) {
           const url = URL.createObjectURL(scene.sketch);
-          canvas.dataset.src = url;
           objectURLs.push(url);
+          const image = new Image();
+          image.onload = () => {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          };
+          image.src = url;
         }
         
         let activeTool = 'draw', isDrawing = false, startPos = null, lastPos = null, savedCanvasState = null;
@@ -630,6 +619,7 @@
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Proyecto de Escaleta'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
+      // CORRECCIÓN: PDF Worker actualizado para incluir nombres de imágenes de referencia.
       const pdfWorkerScript = `
         self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
 
@@ -641,27 +631,35 @@
 
                 const MARGIN = 40;
                 const PAGE_W = doc.internal.pageSize.getWidth();
+                const PAGE_H = doc.internal.pageSize.getHeight();
                 const CONTENT_W = PAGE_W - MARGIN * 2;
                 const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
+                
+                let cursorY = MARGIN;
 
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(24);
-                doc.text(state.title || 'Proyecto de Escaleta', PAGE_W / 2, MARGIN + 20, { align: 'center' });
+                doc.text(state.title || 'Proyecto de Escaleta', PAGE_W / 2, cursorY + 20, { align: 'center' });
+                cursorY += 40;
 
                 if (state.author) {
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(14);
-                    doc.text(\`Por: \${state.author}\`, PAGE_W / 2, MARGIN + 50, { align: 'center' });
+                    doc.text(\`Por: \${state.author}\`, PAGE_W / 2, cursorY + 20, { align: 'center' });
+                    cursorY += 30;
                 }
                 
                 if (state.synopsis) {
+                    cursorY += 30;
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(12);
-                    doc.text('Sinopsis', MARGIN, MARGIN + 90);
+                    doc.text('Sinopsis', MARGIN, cursorY);
+                    cursorY += 20;
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(10);
                     const synopsisLines = doc.splitTextToSize(state.synopsis, CONTENT_W);
-                    doc.text(synopsisLines, MARGIN, MARGIN + 110);
+                    doc.text(synopsisLines, MARGIN, cursorY);
+                    cursorY += synopsisLines.length * 12;
                 }
 
                 for (let i = 0; i < state.scenes.length; i++) {
@@ -690,28 +688,31 @@
                         doc.setFont('helvetica', 'normal');
                         doc.setFontSize(10);
                         const descLines = doc.splitTextToSize(scene.description, CONTENT_W);
+                        if (y + descLines.length * 12 > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
                         doc.text(descLines, MARGIN, y);
                         y += (descLines.length * 12) + 20;
                     }
 
                     if (scene.sketch && typeof scene.sketch === 'string') {
+                        if (y + 40 > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(12);
                         doc.setTextColor(0);
                         doc.text('Storyboard', MARGIN, y);
                         y += 20;
                         const imgHeight = CONTENT_W * 9 / 16;
+                        if (y + imgHeight > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
                         try {
-                            doc.addImage(scene.sketch, undefined, MARGIN, y, CONTENT_W, imgHeight);
+                            doc.addImage(scene.sketch, 'PNG', MARGIN, y, CONTENT_W, imgHeight);
                             y += imgHeight + 20;
                         } catch (err) {
-                            doc.text('Error: No se pudo añadir la imagen del storyboard.', MARGIN, y);
-                            y += 20;
+                            doc.text('Error: No se pudo añadir la imagen del storyboard.', MARGIN, y); y += 20;
                         }
                     }
 
                     const refs = scene.refs.filter(r => r.data && typeof r.data === 'string');
                     if (refs.length > 0) {
+                        if (y + 40 > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(12);
                         doc.setTextColor(0);
@@ -719,15 +720,34 @@
                         y += 20;
                         const imgWidth = (CONTENT_W / 2) - 5;
                         const imgHeight = imgWidth * 9 / 16;
+                        
                         for (let j = 0; j < refs.length; j++) {
+                            const ref = refs[j];
                             const x = MARGIN + (j % 2) * (imgWidth + 10);
-                            try {
-                                doc.addImage(refs[j].data, undefined, x, y, imgWidth, imgHeight);
-                            } catch(err) {
-                                doc.text('Error img.', x, y);
+                            
+                            const textHeight = ref.name ? (doc.splitTextToSize(ref.name, imgWidth).length * 10) : 0;
+                            const totalItemHeight = imgHeight + textHeight + 15;
+                            
+                            if (y + totalItemHeight > PAGE_H - MARGIN) {
+                                doc.addPage();
+                                y = MARGIN;
                             }
+
+                            try {
+                                doc.addImage(ref.data, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');
+                            } catch(err) {
+                                doc.text('Error img.', x, y + imgHeight / 2);
+                            }
+
+                            if(ref.name) {
+                                doc.setFontSize(8);
+                                doc.setTextColor(100);
+                                const captionLines = doc.splitTextToSize(ref.name, imgWidth);
+                                doc.text(captionLines, x, y + imgHeight + 10);
+                            }
+
                             if (j % 2 !== 0 || j === refs.length - 1) {
-                                y += imgHeight + 10;
+                                y += totalItemHeight;
                             }
                         }
                     }
