@@ -24,6 +24,7 @@
   
   <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- jsPDF se cargará dinámicamente al exportar para no ralentizar la carga inicial -->
   
   <script type="application/ld+json">
   {
@@ -243,11 +244,11 @@
 
   <main>
     <section class="hero">
-  <img src="image.webp" alt="Ilustración de una escaleta audiovisual" style="width: 400px; max-width: 100%; height: auto; margin-bottom: 32px; border-radius: 8px;">
-  <h2>Crea Escaletas y Storyboards Profesionales, Fácil y Rápido.</h2>
-  <p>La herramienta definitiva para creadores. Planifica tus vídeos con una escaleta clara, organiza tus ideas y visualiza tu proyecto final, todo en un solo lugar y completamente gratis.</p>
-  <a href="#app" class="btn primary">Empezar a Crear Ahora</a>
-</section>
+      <img src="image.webp" alt="Ilustración de una escaleta audiovisual" style="width: 400px; max-width: 100%; height: auto; margin-bottom: 32px; border-radius: 8px;">
+      <h2>Crea Escaletas y Storyboards Profesionales, Fácil y Rápido.</h2>
+      <p>La herramienta definitiva para creadores. Planifica tus vídeos con una escaleta clara, organiza tus ideas y visualiza tu proyecto final, todo en un solo lugar y completamente gratis.</p>
+      <a href="#app" class="btn primary">Empezar a Crear Ahora</a>
+    </section>
 
     <section class="features">
       <h2>Características Principales</h2>
@@ -400,7 +401,6 @@
         $('.up', el).onclick = () => { if (index > 0) { swap(state.scenes, index, index - 1); updateAndRender(); } };
         $('.down', el).onclick = () => { if (index < state.scenes.length - 1) { swap(state.scenes, index, index + 1); updateAndRender(); } };
         
-        // CORRECCIÓN: Se usa structuredClone para duplicar la escena de forma segura, preservando los Blobs.
         $('.dup', el).onclick = async () => {
           const clone = structuredClone(scene);
           clone.id = uid();
@@ -529,6 +529,7 @@
         return el;
       }
       
+      // --- MODAL DIALOGS ---
       const dialog = { overlay: $('#custom-dialog-overlay'), title: $('#dialog-title'), message: $('#dialog-message'), btnConfirm: $('#dialog-btn-confirm'), btnCancel: $('#dialog-btn-cancel') };
       let onConfirmCallback = null;
       function showDialog({ title, message, confirmText = 'Continuar', onConfirm }) { dialog.title.textContent = title; dialog.message.textContent = message; dialog.btnConfirm.textContent = confirmText; onConfirmCallback = onConfirm; dialog.overlay.hidden = false; }
@@ -566,58 +567,286 @@
       helpModal.overlay.onclick = (e) => { if (e.target === helpModal.overlay) helpModal.overlay.hidden = true; };
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !helpModal.overlay.hidden) { helpModal.overlay.hidden = true; } });
       
+      // --- EVENT HANDLERS ---
       $('#title').addEventListener('input', async e => { state.title = e.target.value; await persist(); });
       $('#author').addEventListener('input', async e => { state.author = e.target.value; await persist(); });
       $('#synopsis').addEventListener('input', async e => { state.synopsis = e.target.value; await persist(); });
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Proyecto de Escaleta'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
-      const pdfWorkerScript = `self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');self.onmessage=async e=>{try{const{state:t}=e.data,{jsPDF:a}=self.jspdf,s=new a({unit:"pt",format:"a4"}),r=40,o=s.internal.pageSize.getWidth(),d=s.internal.pageSize.getHeight(),n=o-80,l=t=>t.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9\\s-]/g,"").replace(/[\\s-]+/g,"-").replace(/(^-|-$)/g,"");let c=r;s.setFont("helvetica","bold"),s.setFontSize(24),s.text(t.title||"Proyecto de Escaleta",o/2,c+20,{align:"center"}),c+=40,t.author&&(s.setFont("helvetica","normal"),s.setFontSize(14),s.text(\`Por: \${t.author}\`,o/2,c+20,{align:"center"}),c+=30),t.synopsis&&(c+=30,s.setFont("helvetica","bold"),s.setFontSize(12),s.text("Sinopsis",r,c),c+=20,s.setFont("helvetica","normal"),s.setFontSize(10),(()=>{const e=s.splitTextToSize(t.synopsis,n);s.text(e,r,c),c+=12*e.length})());for(let e=0;e<t.scenes.length;e++){const a=t.scenes[e];s.addPage();let c=r;s.setFont("helvetica","bold"),s.setFontSize(16),s.text(\`SECUENCIA \${e+1}: \${a.title||"Sin título"}\`,r,c),c+=30,s.setFont("helvetica","normal"),s.setFontSize(9),s.setTextColor(100),a.location&&(s.text(\`Localización: \${a.location}\`,r,c),c+=15),a.tags&&a.tags.length>0&&(s.text(\`Etiquetas: \${a.tags.join(", ")}\`,r,c),c+=15),c+=10,a.description&&(s.setFont("helvetica","bold"),s.setFontSize(12),s.setTextColor(0),s.text("Descripción",r,c),c+=20,s.setFont("helvetica","normal"),s.setFontSize(10),(()=>{const t=s.splitTextToSize(a.description,n);c+12*t.length>d-r&&(s.addPage(),c=r),s.text(t,r,c),c+=12*t.length+20})()),a.sketch&&"string"==typeof a.sketch&&(c+40>d-r&&(s.addPage(),c=r),s.setFont("helvetica","bold"),s.setFontSize(12),s.setTextColor(0),s.text("Storyboard",r,c),c+=20,(()=>{const t=n*9/16;c+t>d-r&&(s.addPage(),c=r);try{s.addImage(a.sketch,"PNG",r,c,n,t),c+=t+20}catch(t){s.text("Error: No se pudo añadir la imagen del storyboard.",r,c),c+=20}})());const p=a.refs.filter(t=>t.data&&"string"==typeof t.data);if(p.length>0){c+40>d-r&&(s.addPage(),c=r),s.setFont("helvetica","bold"),s.setFontSize(12),s.setTextColor(0),s.text("Referencias",r,c),c+=20;const t=(n-10)/2,i=t*9/16;for(let a=0;a<p.length;a++){const o=p[a],l=r+(a%2)*(t+10),u=o.name?10*s.splitTextToSize(o.name,t).length:0,g=i+u+15;c+g>d-r&&(s.addPage(),c=r);try{s.addImage(o.data,"PNG",l,c,t,i,void 0,"FAST")}catch(t){s.text("Error img.",l,c+i/2)}o.name&&(s.setFontSize(8),s.setTextColor(100),(()=>{const a=s.splitTextToSize(o.name,t);s.text(a,l,c+i+10)})()),(a%2!=0||a===p.length-1)&&(c+=g)}}}}catch(t){return void self.postMessage({error:t.message+" Stack: "+t.stack})}const e=s.output("blob");self.postMessage({blob:e,filename:\`\${l(t.title||"proyecto")}.pdf\`})};`;
-      const zipWorkerScript = `self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');self.onmessage=async e=>{const{state:t}=e.data,a=e=>e.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9\\s-]/g,"").replace(/[\\s-]+/g,"-").replace(/(^-|-$)/g,""),s=new JSZip,r=s.folder("assets"),o=JSON.parse(JSON.stringify(t));for(let e=0;e<t.scenes.length;e++){const i=t.scenes[e],n=o.scenes[e];if(i.sketch instanceof Blob){const t=\`sketch-\${i.id}.png\`;r.file(t,i.sketch),n.sketch=\`assets/\${t}\`}if(i.refs&&i.refs.length)for(let t=0;t<i.refs.length;t++){const a=i.refs[t];if(a.data instanceof Blob){const s=a.data.type.split("/")[1]||"png",l=\`ref-\${i.id}-\${a.id}.\${s}\`;r.file(l,a.data),o.scenes[e].refs[t].data=\`assets/\${l}\`}}}s.file("project.json",JSON.stringify(o,null,2));const i=await s.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}});self.postMessage({blob:i,filename:\`\${a(t.title||"proyecto")}.zip\`})};`;
       
-      function createWorker(scriptContent) { return new Worker(URL.createObjectURL(new Blob([scriptContent], { type: 'application/javascript' }))); }
+      // --- NEW, SIMPLIFIED EXPORT LOGIC ---
+      
+      // Helper to load external scripts dynamically
+      function loadScript(url) {
+        return new Promise((resolve, reject) => {
+          if (document.querySelector(`script[src="${url}"]`)) {
+            resolve();
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = url;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
 
-      async function handleExportWithWorker(button, workerScript) {
+      // PDF Export function (runs on main thread)
+      async function exportPdf() {
+        const button = $('#btn-export-pdf');
         if (button.classList.contains('loading')) return;
-        button.classList.add('loading'); button.disabled = true;
-        const stateFromDB = await db.project.get(PROJECT_ID);
-        if (!stateFromDB) { alert("No hay proyecto guardado para exportar."); button.classList.remove('loading'); button.disabled = false; return; }
-        
-        const worker = createWorker(workerScript);
-        worker.onmessage = (e) => {
-            if (e.data.error) { console.error('Error desde el Web Worker:', e.data.error); alert('Ocurrió un error al generar el archivo.'); } 
-            else { const { blob, filename } = e.data; const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href); }
-            button.classList.remove('loading'); button.disabled = false; worker.terminate();
-        };
-        worker.onerror = (e) => { console.error('Error fatal en el Web Worker:', e.message, e); alert('Ocurrió un error al generar el archivo.'); button.classList.remove('loading'); button.disabled = false; worker.terminate(); };
-        
-        const stateToExport = stateFromDB;
-        if (workerScript === pdfWorkerScript) {
-            // CORRECCIÓN: Se usa structuredClone para crear una copia segura del estado, incluyendo Blobs.
-            const stateForExport = structuredClone(stateToExport);
-            const conversionPromises = [];
-            // Se itera sobre la copia segura y se convierten sus Blobs a data URLs para el worker.
-            for (const scene of stateForExport.scenes) {
-                if (scene.sketch instanceof Blob) {
-                    conversionPromises.push(blobToDataURL(scene.sketch).then(dataUrl => { scene.sketch = dataUrl; }));
-                }
-                if (scene.refs) {
-                    for (const ref of scene.refs) {
-                        if (ref.data instanceof Blob) {
-                            conversionPromises.push(blobToDataURL(ref.data).then(dataUrl => { ref.data = dataUrl; }));
-                        }
-                    }
-                }
+        button.classList.add('loading');
+        button.disabled = true;
+
+        try {
+          // 1. Load jsPDF library
+          await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+          const { jsPDF } = window.jspdf;
+
+          // 2. Get the full project state from the database
+          const projectData = await db.project.get(PROJECT_ID);
+          if (!projectData) {
+            alert("No hay proyecto guardado para exportar.");
+            return;
+          }
+          
+          // 3. Convert all image Blobs to data URLs for the PDF
+          const stateForExport = structuredClone(projectData);
+          const conversionPromises = [];
+          for (const scene of stateForExport.scenes) {
+            if (scene.sketch instanceof Blob) {
+              conversionPromises.push(blobToDataURL(scene.sketch).then(dataUrl => { scene.sketch = dataUrl; }));
             }
-            await Promise.all(conversionPromises);
-            worker.postMessage({ state: stateForExport });
-        } else {
-            worker.postMessage({ state: stateToExport });
+            if (scene.refs) {
+              for (const ref of scene.refs) {
+                if (ref.data instanceof Blob) {
+                  conversionPromises.push(blobToDataURL(ref.data).then(dataUrl => { ref.data = dataUrl; }));
+                }
+              }
+            }
+          }
+          await Promise.all(conversionPromises);
+
+          // 4. Build the PDF document
+          const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+          const MARGIN = 40;
+          const PAGE_WIDTH = doc.internal.pageSize.getWidth();
+          const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
+          const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2);
+          let cursorY = MARGIN;
+
+          // Add title page
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(24);
+          doc.text(stateForExport.title || 'Proyecto de Escaleta', PAGE_WIDTH / 2, cursorY + 20, { align: 'center' });
+          cursorY += 40;
+
+          if (stateForExport.author) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(14);
+            doc.text(`Por: ${stateForExport.author}`, PAGE_WIDTH / 2, cursorY + 20, { align: 'center' });
+            cursorY += 30;
+          }
+
+          if (stateForExport.synopsis) {
+            cursorY += 30;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('Sinopsis', MARGIN, cursorY);
+            cursorY += 20;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            const synopsisLines = doc.splitTextToSize(stateForExport.synopsis, CONTENT_WIDTH);
+            doc.text(synopsisLines, MARGIN, cursorY);
+            cursorY += (12 * synopsisLines.length);
+          }
+
+          // Add each scene
+          for (let i = 0; i < stateForExport.scenes.length; i++) {
+            const scene = stateForExport.scenes[i];
+            doc.addPage();
+            cursorY = MARGIN;
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text(`SECUENCIA ${i + 1}: ${scene.title || 'Sin título'}`, MARGIN, cursorY);
+            cursorY += 30;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            if (scene.location) {
+              doc.text(`Localización: ${scene.location}`, MARGIN, cursorY);
+              cursorY += 15;
+            }
+            if (scene.tags && scene.tags.length) {
+              doc.text(`Etiquetas: ${scene.tags.join(', ')}`, MARGIN, cursorY);
+              cursorY += 15;
+            }
+            cursorY += 10;
+            
+            if (scene.description) {
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(12);
+              doc.setTextColor(0);
+              doc.text('Descripción', MARGIN, cursorY);
+              cursorY += 20;
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(10);
+              const descLines = doc.splitTextToSize(scene.description, CONTENT_WIDTH);
+              if (cursorY + (12 * descLines.length) > PAGE_HEIGHT - MARGIN) {
+                  doc.addPage();
+                  cursorY = MARGIN;
+              }
+              doc.text(descLines, MARGIN, cursorY);
+              cursorY += (12 * descLines.length) + 20;
+            }
+
+            if (scene.sketch && typeof scene.sketch === 'string') {
+              if (cursorY + 40 > PAGE_HEIGHT - MARGIN) { doc.addPage(); cursorY = MARGIN; }
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(12);
+              doc.setTextColor(0);
+              doc.text('Storyboard', MARGIN, cursorY);
+              cursorY += 20;
+
+              const imgHeight = CONTENT_WIDTH * 9 / 16;
+              if (cursorY + imgHeight > PAGE_HEIGHT - MARGIN) { doc.addPage(); cursorY = MARGIN; }
+              try {
+                doc.addImage(scene.sketch, undefined, MARGIN, cursorY, CONTENT_WIDTH, imgHeight);
+                cursorY += imgHeight + 20;
+              } catch (e) {
+                console.error("Error al añadir imagen del storyboard al PDF:", e);
+                doc.text("Error: No se pudo añadir la imagen del storyboard.", MARGIN, cursorY);
+                cursorY += 20;
+              }
+            }
+
+            const validRefs = scene.refs.filter(r => r.data && typeof r.data === 'string');
+            if (validRefs.length > 0) {
+              if (cursorY + 40 > PAGE_HEIGHT - MARGIN) { doc.addPage(); cursorY = MARGIN; }
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(12);
+              doc.setTextColor(0);
+              doc.text('Referencias', MARGIN, cursorY);
+              cursorY += 20;
+
+              const refWidth = (CONTENT_WIDTH - 10) / 2;
+              const refHeight = refWidth * 9 / 16;
+
+              for (let j = 0; j < validRefs.length; j++) {
+                const ref = validRefs[j];
+                const refX = MARGIN + (j % 2) * (refWidth + 10);
+                
+                const nameHeight = ref.name ? (10 * doc.splitTextToSize(ref.name, refWidth).length) : 0;
+                const totalRefHeight = refHeight + nameHeight + 15;
+                if (cursorY + totalRefHeight > PAGE_HEIGHT - MARGIN) {
+                  doc.addPage();
+                  cursorY = MARGIN;
+                }
+
+                try {
+                  doc.addImage(ref.data, undefined, refX, cursorY, refWidth, refHeight, undefined, 'FAST');
+                } catch(e) {
+                  console.error("Error al añadir imagen de referencia al PDF:", e);
+                  doc.text("Error img.", refX, cursorY + refHeight / 2);
+                }
+
+                if (ref.name) {
+                  doc.setFontSize(8);
+                  doc.setTextColor(100);
+                  const nameLines = doc.splitTextToSize(ref.name, refWidth);
+                  doc.text(nameLines, refX, cursorY + refHeight + 10);
+                }
+                
+                if (j % 2 !== 0 || j === validRefs.length - 1) {
+                  cursorY += totalRefHeight;
+                }
+              }
+            }
+          }
+
+          // 5. Save and download the file
+          const pdfBlob = doc.output('blob');
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(pdfBlob);
+          a.download = `${slug(stateForExport.title || 'proyecto')}.pdf`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+
+        } catch (error) {
+          console.error("Error fatal al generar el PDF:", error);
+          alert('Ocurrió un error al generar el archivo. Revisa la consola para más detalles (F12).');
+        } finally {
+          button.classList.remove('loading');
+          button.disabled = false;
         }
       }
 
-      $('#btn-export-zip').onclick = () => handleExportWithWorker($('#btn-export-zip'), zipWorkerScript);
-      $('#btn-export-pdf').onclick = () => handleExportWithWorker($('#btn-export-pdf'), pdfWorkerScript);
+      // ZIP Export function (runs on main thread)
+      async function exportZip() {
+          const button = $('#btn-export-zip');
+          if (button.classList.contains('loading')) return;
+          button.classList.add('loading');
+          button.disabled = true;
+
+          try {
+              const projectData = await db.project.get(PROJECT_ID);
+              if (!projectData) {
+                  alert("No hay proyecto guardado para exportar.");
+                  return;
+              }
+
+              const zip = new JSZip();
+              const assetsFolder = zip.folder("assets");
+
+              // Create a text representation of the project for the JSON file
+              const projectJson = structuredClone(projectData);
+
+              for (let i = 0; i < projectData.scenes.length; i++) {
+                  const scene = projectData.scenes[i];
+                  const jsonScene = projectJson.scenes[i];
+
+                  if (scene.sketch instanceof Blob) {
+                      const filename = `sketch-${scene.id}.png`;
+                      assetsFolder.file(filename, scene.sketch);
+                      jsonScene.sketch = `assets/${filename}`;
+                  }
+                  if (scene.refs && scene.refs.length) {
+                      for (let j = 0; j < scene.refs.length; j++) {
+                          const ref = scene.refs[j];
+                          if (ref.data instanceof Blob) {
+                              const extension = ref.data.type.split('/')[1] || 'png';
+                              const filename = `ref-${scene.id}-${ref.id}.${extension}`;
+                              assetsFolder.file(filename, ref.data);
+                              projectJson.scenes[i].refs[j].data = `assets/${filename}`;
+                          }
+                      }
+                  }
+              }
+              
+              zip.file("project.json", JSON.stringify(projectJson, null, 2));
+
+              const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
+              
+              const a = document.createElement('a');
+              a.href = URL.createObjectURL(zipBlob);
+              a.download = `${slug(projectData.title || 'proyecto')}.zip`;
+              a.click();
+              URL.revokeObjectURL(a.href);
+
+          } catch (error) {
+              console.error("Error al generar el ZIP:", error);
+              alert('Ocurrió un error al generar el archivo ZIP.');
+          } finally {
+              button.classList.remove('loading');
+              button.disabled = false;
+          }
+      }
+
+      $('#btn-export-pdf').onclick = exportPdf;
+      $('#btn-export-zip').onclick = exportZip;
 
       $('#import-zip').onchange = (e) => {
         const file = e.target.files?.[0]; if (!file) return;
@@ -648,6 +877,7 @@
         });
       };
       
+      // --- UTILITY FUNCTIONS ---
       function swap(arr, i, j) { const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
       function escapeHtml(s = '') { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
       function slug(s = '') { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/(^-|-$)/g, ''); }
