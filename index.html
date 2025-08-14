@@ -312,7 +312,7 @@
   </main>
   
   <script>
-    // ====== ROBUST PDF EXPORTER MODULE ======
+    // ====== ROBUST PDF EXPORTER MODULE (OPTIMIZED) ======
     const PDFExporter = (() => {
         const MARGIN = 40;
         const A4_W = 595.28, A4_H = 841.89;
@@ -332,7 +332,9 @@
             });
         }
 
-        async function blobToJpegDataURL(blob, targetWidth) {
+        // ====== PDF QUALITY ENHANCEMENT 1: Improved Image Conversion ======
+        // Converts a blob to a high-quality JPEG data URL, scaled to a target size on its longest side.
+        async function blobToJpegDataURL(blob, targetLongSide) {
             return new Promise((resolve, reject) => {
                 if (!(blob instanceof Blob)) {
                     return reject(new Error("Invalid input: not a Blob."));
@@ -341,15 +343,23 @@
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    const scale = targetWidth / img.width;
-                    canvas.width = targetWidth;
+                    
+                    let scale;
+                    if (img.width >= img.height) {
+                        scale = targetLongSide / img.width;
+                    } else {
+                        scale = targetLongSide / img.height;
+                    }
+
+                    canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
                     
                     ctx.fillStyle = '#ffffff'; // Solid white background
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                    resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    // Increased quality to 0.92 for better visual results
+                    resolve(canvas.toDataURL('image/jpeg', 0.92));
                     URL.revokeObjectURL(img.src);
                 };
                 img.onerror = () => reject(new Error("Image could not be loaded from blob for PDF conversion."));
@@ -471,29 +481,31 @@
                     doc.setFontSize(12).setFont(undefined, 'bold').setTextColor(0);
                     cursorY = writeParagraph(doc, 'Referencias', MARGIN, cursorY, { maxWidth: CONTENT_W, lineHeight: LINE_H_M, pageHeight: A4_H, margin: MARGIN });
 
-                    const refWidth = (CONTENT_W - 20) / 3;
-                    const refHeight = refWidth * 9 / 16;
-                    
+                    // ====== PDF QUALITY ENHANCEMENT 2: New Reference Layout ======
+                    // Display one large, high-quality reference image per row.
                     for (let j = 0; j < validRefs.length; j++) {
                         const ref = validRefs[j];
-                        const colIndex = j % 3;
-                        if (colIndex === 0 && j > 0) {
-                           cursorY += refHeight + 40; // New row
-                        }
-                        const refX = MARGIN + colIndex * (refWidth + 10);
                         
-                        if (cursorY + refHeight + 40 > A4_H - MARGIN) {
+                        // Use CONTENT_W (~515px) as the target for the longest side.
+                        const jpegRefUrl = await blobToJpegDataURL(ref.data, CONTENT_W);
+                        updateProgress();
+
+                        // Get image dimensions to correctly calculate height and place it
+                        const imgProps = doc.getImageProperties(jpegRefUrl);
+                        const imgHeight = (CONTENT_W / imgProps.width) * imgProps.height;
+
+                        if (cursorY + imgHeight + 30 > A4_H - MARGIN) {
                             doc.addPage();
                             cursorY = MARGIN;
                         }
-                        const jpegRefUrl = await blobToJpegDataURL(ref.data, refWidth);
-                        updateProgress();
+                        
+                        doc.addImage(jpegRefUrl, 'JPEG', MARGIN, cursorY, CONTENT_W, imgHeight, undefined, 'FAST');
+                        cursorY += imgHeight + 5;
 
-                        doc.addImage(jpegRefUrl, 'JPEG', refX, cursorY, refWidth, refHeight, undefined, 'FAST');
                         doc.setFontSize(8).setFont(undefined, 'normal').setTextColor(100);
-                        writeParagraph(doc, ref.name, refX, cursorY + refHeight + 5, { maxWidth: refWidth, lineHeight: 10, pageHeight: A4_H, margin: MARGIN });
+                        cursorY = writeParagraph(doc, ref.name, MARGIN, cursorY, { maxWidth: CONTENT_W, lineHeight: 10, pageHeight: A4_H, margin: MARGIN });
+                        cursorY += 20; // Extra space before the next image
                     }
-                    cursorY += refHeight + 40;
                 }
             }
 
@@ -505,7 +517,6 @@
 
     // ====== MAIN APP SCRIPT ======
     
-    // --- FIX: Define DB at a higher scope ---
     const db = new Dexie('storyboardAppDB');
     db.version(1).stores({ project: 'id' });
     const PROJECT_ID = 1;
@@ -569,7 +580,6 @@
           try {
               const savedState = await db.project.get(PROJECT_ID);
               if (savedState) {
-                  // A blob-safe clone is needed
                   const clonedState = safeClone(savedState);
                   for (let i = 0; i < savedState.scenes.length; i++) {
                       if (savedState.scenes[i].sketch) clonedState.scenes[i].sketch = savedState.scenes[i].sketch;
@@ -672,7 +682,19 @@
         
         const thumbs = $('.thumbs', el);
         const fileInput = $('.file-refs', el);
-        fileInput.onchange = async () => { const files = Array.from(fileInput.files || []); for (const f of files) { const blob = await fileToBlob(f); if (!scene.refs) scene.refs = []; scene.refs.push({ id: uid(), name: f.name, data: blob }); } await updateAndRender(); fileInput.value = ''; };
+        // ====== STORAGE OPTIMIZATION: Resize images on upload ======
+        fileInput.onchange = async () => { 
+            const files = Array.from(fileInput.files || []); 
+            for (const f of files) { 
+                const originalBlob = await fileToBlob(f); 
+                // Resize image to max 1200px before saving to save space and improve performance
+                const optimizedBlob = await resizeImageBeforeSave(originalBlob);
+                if (!scene.refs) scene.refs = []; 
+                scene.refs.push({ id: uid(), name: f.name, data: optimizedBlob }); 
+            } 
+            await updateAndRender(); 
+            fileInput.value = ''; 
+        };
         
         function drawThumbs() { 
           thumbs.innerHTML = ''; 
@@ -933,6 +955,43 @@
       function slug(s = '') { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/(^-|-$)/g, ''); }
       function getXY(e, canvas) { const r = canvas.getBoundingClientRect(); const scaleX = canvas.width / r.width; const scaleY = canvas.height / r.height; return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY }; }
       
+      // ====== STORAGE OPTIMIZATION: New Helper Function ======
+      // Resizes an image before saving to DB to optimize storage space.
+      async function resizeImageBeforeSave(blob, maxLongSide = 1200) {
+          return new Promise((resolve, reject) => {
+              const img = new Image();
+              img.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  const ctx = canvas.getContext('2d');
+                  
+                  let { width, height } = img;
+                  if (width > height) {
+                      if (width > maxLongSide) {
+                          height *= maxLongSide / width;
+                          width = maxLongSide;
+                      }
+                  } else {
+                      if (height > maxLongSide) {
+                          width *= maxLongSide / height;
+                          height = maxLongSide;
+                      }
+                  }
+                  canvas.width = width;
+                  canvas.height = height;
+
+                  ctx.drawImage(img, 0, 0, width, height);
+                  
+                  // Save as a high-quality JPEG for a good balance.
+                  canvas.toBlob(resizedBlob => {
+                      resolve(resizedBlob);
+                      URL.revokeObjectURL(img.src);
+                  }, 'image/jpeg', 0.9);
+              };
+              img.onerror = () => reject(new Error("Could not load image to resize it."));
+              img.src = URL.createObjectURL(blob);
+          });
+      }
+      
       (async() => {
         const robotoFontUrl = 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2';
         try {
@@ -944,7 +1003,7 @@
             };
             reader.readAsDataURL(fontBlob);
         } catch(e) {
-            console.error("No se pudo cargar la fuente Roboto para incrustar en el PDF.", e);
+            console.error("Could not load Roboto font for PDF embedding.", e);
         }
         await loadInitialState();
         render();
