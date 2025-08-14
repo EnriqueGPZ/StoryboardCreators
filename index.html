@@ -4,16 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
-  <title>Escaleta Creator - Crea Escaletas y Storyboards Online</title>
+  <title>Escaleta Creator - Crea Escaletas y Storyboards Online en escaletas.es</title>
   
   <meta name="description" content="Crea tu escaleta y storyboard profesional con Escaleta Creator. La herramienta online y gratuita para planificar tus vídeos, guiones y proyectos creativos. Organiza secuencias, notas y referencias visuales fácilmente.">
-  <meta name="keywords" content="escaleta, creador de escaleta, escaleta para video, escaleta audiovisual, storyboard online, creador de storyboard, Escaleta Creator, herramienta para youtubers, planificador de vídeo, guion gráfico, storyboard gratis, video planner, storyboard creator">
-  <meta name="author" content="Escaleta Creator">
-  <link rel="canonical" href="https://[TU-URL-AQUI.com]/final.html" />
+  <meta name="keywords" content="escaleta, creador de escaleta, escaleta para video, escaleta audiovisual, storyboard online, creador de storyboard, Escaleta Creator, herramienta para youtubers, planificador de vídeo, guion gráfico, storyboard gratis, video planner, storyboard creator, escaletas.es">
+  <meta name="author" content="Enrique Gil">
+  <link rel="canonical" href="https://www.escaletas.es/" />
 
   <meta property="og:title" content="Escaleta Creator - Herramienta de Escaleta y Storyboard Online" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://[TU-URL-AQUI.com]/final.html" />
+  <meta property="og:url" content="https://www.escaletas.es/" />
   <meta property="og:image" content="https://[URL-A-UNA-IMAGEN-PREVIEW.png]" />
   <meta property="og:description" content="Planifica tus vídeos como un profesional. Crea escaletas detalladas y storyboards visuales con esta herramienta online y gratuita para creadores de contenido." />
 
@@ -41,7 +41,7 @@
           "priceCurrency": "USD"
         },
         "description": "Una herramienta online para crear escaletas audiovisuales y storyboards detallados. Planifica secuencias, añade notas, referencias visuales y exporta a PDF y ZIP. Diseñada para creadores de contenido, cineastas y educadores.",
-        "url": "https://[TU-URL-AQUI.com]/final.html"
+        "url": "https://www.escaletas.es/"
       }
     ]
   }
@@ -575,9 +575,8 @@
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Proyecto de Escaleta'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
       
-      // --- NEW, SIMPLIFIED EXPORT LOGIC ---
+      // --- SIMPLIFIED EXPORT LOGIC (NO WEB WORKERS) ---
       
-      // Helper to load external scripts dynamically
       function loadScript(url) {
         return new Promise((resolve, reject) => {
           if (document.querySelector(`script[src="${url}"]`)) {
@@ -592,7 +591,6 @@
         });
       }
 
-      // PDF Export function (runs on main thread)
       async function exportPdf() {
         const button = $('#btn-export-pdf');
         if (button.classList.contains('loading')) return;
@@ -600,18 +598,15 @@
         button.disabled = true;
 
         try {
-          // 1. Load jsPDF library
           await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
           const { jsPDF } = window.jspdf;
 
-          // 2. Get the full project state from the database
           const projectData = await db.project.get(PROJECT_ID);
           if (!projectData) {
             alert("No hay proyecto guardado para exportar.");
             return;
           }
           
-          // 3. Convert all image Blobs to data URLs for the PDF
           const stateForExport = structuredClone(projectData);
           const conversionPromises = [];
           for (const scene of stateForExport.scenes) {
@@ -628,7 +623,6 @@
           }
           await Promise.all(conversionPromises);
 
-          // 4. Build the PDF document
           const doc = new jsPDF({ unit: 'pt', format: 'a4' });
           const MARGIN = 40;
           const PAGE_WIDTH = doc.internal.pageSize.getWidth();
@@ -636,7 +630,6 @@
           const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2);
           let cursorY = MARGIN;
 
-          // Add title page
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(24);
           doc.text(stateForExport.title || 'Proyecto de Escaleta', PAGE_WIDTH / 2, cursorY + 20, { align: 'center' });
@@ -662,7 +655,6 @@
             cursorY += (12 * synopsisLines.length);
           }
 
-          // Add each scene
           for (let i = 0; i < stateForExport.scenes.length; i++) {
             const scene = stateForExport.scenes[i];
             doc.addPage();
@@ -680,6 +672,18 @@
               doc.text(`Localización: ${scene.location}`, MARGIN, cursorY);
               cursorY += 15;
             }
+            // --- NEW: Add clickable location URL ---
+            if (scene.locationURL) {
+              doc.setTextColor(0, 122, 255); // Blue color for link
+              const urlLines = doc.splitTextToSize(scene.locationURL, CONTENT_WIDTH);
+              for(const line of urlLines) {
+                 doc.textWithLink(line, MARGIN, cursorY, { url: scene.locationURL });
+                 cursorY += 12;
+              }
+              cursorY += 3; // Extra space after link
+              doc.setTextColor(100); // Reset color
+            }
+            // --- END NEW ---
             if (scene.tags && scene.tags.length) {
               doc.text(`Etiquetas: ${scene.tags.join(', ')}`, MARGIN, cursorY);
               cursorY += 15;
@@ -767,7 +771,6 @@
             }
           }
 
-          // 5. Save and download the file
           const pdfBlob = doc.output('blob');
           const a = document.createElement('a');
           a.href = URL.createObjectURL(pdfBlob);
@@ -784,7 +787,6 @@
         }
       }
 
-      // ZIP Export function (runs on main thread)
       async function exportZip() {
           const button = $('#btn-export-zip');
           if (button.classList.contains('loading')) return;
@@ -801,7 +803,6 @@
               const zip = new JSZip();
               const assetsFolder = zip.folder("assets");
 
-              // Create a text representation of the project for the JSON file
               const projectJson = structuredClone(projectData);
 
               for (let i = 0; i < projectData.scenes.length; i++) {
