@@ -302,7 +302,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       const $ = (sel, p = document) => p.querySelector(sel);
       const $$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
-      // CORRECCIÓN: UID más robusto para evitar colisiones.
       const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
       
       const themeToggle = $('#btn-theme-toggle');
@@ -352,8 +351,6 @@
       async function loadInitialState() { try { const savedState = await db.project.get(PROJECT_ID); if (savedState) { delete savedState.id; Object.assign(state, savedState); state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; }); } } catch (error) { console.error("Error al cargar desde IndexedDB:", error); } }
       function revokeObjectURLs() { objectURLs.forEach(url => URL.revokeObjectURL(url)); objectURLs = []; }
 
-      // CORRECCIÓN: Se ha eliminado el IntersectionObserver (lazyLoadObserver) para un manejo de imágenes más robusto y simple.
-
       function render() {
         revokeObjectURLs();
         $('#title').value = state.title;
@@ -364,7 +361,6 @@
         state.scenes.forEach((s, i) => {
           const sceneEl = renderScene(s, i);
           wrap.appendChild(sceneEl);
-          // CORRECCIÓN: Ya no se observa el elemento para lazy loading.
         });
       }
       
@@ -387,7 +383,15 @@
         $('.inp-desc', el).addEventListener('input', async e => { scene.description = e.target.value; await update(); });
         $('.up', el).onclick = () => { if (index > 0) { swap(state.scenes, index, index - 1); updateAndRender(); } };
         $('.down', el).onclick = () => { if (index < state.scenes.length - 1) { swap(state.scenes, index, index + 1); updateAndRender(); } };
-        $('.dup', el).onclick = () => { const clone = JSON.parse(JSON.stringify(scene)); clone.id = uid(); state.scenes.splice(index + 1, 0, clone); updateAndRender(); };
+        
+        // CORRECCIÓN: Se usa structuredClone para duplicar la escena de forma segura, preservando los Blobs.
+        $('.dup', el).onclick = async () => {
+          const clone = structuredClone(scene);
+          clone.id = uid();
+          state.scenes.splice(index + 1, 0, clone);
+          await updateAndRender();
+        };
+
         $('.del', el).onclick = () => showDialog({ title: 'Eliminar Secuencia', message: '¿Seguro que quieres eliminar esta secuencia? Esta acción no se puede deshacer.', confirmText: 'Sí, eliminar', onConfirm: () => { state.scenes.splice(index, 1); if (!state.scenes.length) state.scenes.push(defaultScene()); updateAndRender(); } });
         
         $('.download-sb', el).onclick = () => {
@@ -437,12 +441,6 @@
         
         const canvas = $('canvas', el);
         const ctx = canvas.getContext('2d');
-        const controls = $('.controls', el);
-        const sizeInput = $('.size', el);
-        const colorPicker = $('.color-picker', el);
-        colorPicker.value = document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000';
-        
-        // CORRECCIÓN: Se dibuja directamente el contenido del storyboard sin usar data-src.
         if (scene.sketch instanceof Blob) {
           const url = URL.createObjectURL(scene.sketch);
           objectURLs.push(url);
@@ -454,37 +452,23 @@
           image.src = url;
         }
         
+        const controls = $('.controls', el);
+        const sizeInput = $('.size', el);
+        const colorPicker = $('.color-picker', el);
+        colorPicker.value = document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000';
+        
         let activeTool = 'draw', isDrawing = false, startPos = null, lastPos = null, savedCanvasState = null;
         const getPos = (e) => getXY(e, canvas);
         
         const drawFinalShape = (start, end) => {
             const color = colorPicker.value;
             const lineWidth = +sizeInput.value;
-            ctx.lineWidth = lineWidth;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.globalCompositeOperation = 'source-over';
-            
+            ctx.lineWidth = lineWidth; ctx.lineCap = 'round'; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.globalCompositeOperation = 'source-over';
             ctx.beginPath();
-            if (activeTool === 'line') {
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-            } else if (activeTool === 'rectangle') {
-                ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
-            } else if (activeTool === 'circle') {
-                const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-                ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
-            } else if (activeTool === 'arrow') {
-                const headLength = 10 + lineWidth;
-                const angle = Math.atan2(end.y - start.y, end.x - start.x);
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.moveTo(end.x, end.y);
-                ctx.lineTo(end.x - headLength * Math.cos(angle - Math.PI / 6), end.y - headLength * Math.sin(angle - Math.PI / 6));
-                ctx.moveTo(end.x, end.y);
-                ctx.lineTo(end.x - headLength * Math.cos(angle + Math.PI / 6), end.y - headLength * Math.sin(angle + Math.PI / 6));
-            }
+            if (activeTool === 'line') { ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); } 
+            else if (activeTool === 'rectangle') { ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y); }
+            else if (activeTool === 'circle') { const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)); ctx.arc(start.x, start.y, radius, 0, Math.PI * 2); } 
+            else if (activeTool === 'arrow') { const headLength = 10 + lineWidth; const angle = Math.atan2(end.y - start.y, end.x - start.x); ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); ctx.moveTo(end.x, end.y); ctx.lineTo(end.x - headLength * Math.cos(angle - Math.PI / 6), end.y - headLength * Math.sin(angle - Math.PI / 6)); ctx.moveTo(end.x, end.y); ctx.lineTo(end.x - headLength * Math.cos(angle + Math.PI / 6), end.y - headLength * Math.sin(angle + Math.PI / 6)); }
             ctx.stroke();
         };
 
@@ -493,40 +477,22 @@
           if (activeTool === 'text') { 
             const text = prompt('Escribe el texto que quieres añadir:', ''); 
             if (text) { 
-              const pos = getPos(posEvent); 
-              ctx.font = `${+sizeInput.value * 3}px Roboto`; 
-              ctx.fillStyle = colorPicker.value;
-              ctx.globalCompositeOperation = 'source-over'; 
-              ctx.fillText(text, pos.x, pos.y); 
+              const pos = getPos(posEvent); ctx.font = `${+sizeInput.value * 3}px Roboto`; ctx.fillStyle = colorPicker.value; ctx.globalCompositeOperation = 'source-over'; ctx.fillText(text, pos.x, pos.y); 
               (async () => { scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content'); })(); 
             } 
             return; 
           }
           isDrawing = true; startPos = getPos(posEvent); lastPos = startPos;
-          if (['line', 'rectangle', 'circle', 'arrow'].includes(activeTool)) {
-            savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          }
+          if (['line', 'rectangle', 'circle', 'arrow'].includes(activeTool)) { savedCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height); }
         };
         const draw = (e) => {
           if (!isDrawing) return; e.preventDefault(); const posEvent = e.touches ? e.touches[0] : e; const currentPos = getPos(posEvent);
-          if (activeTool === 'draw' || activeTool === 'erase') { 
-            ctx.lineWidth = +sizeInput.value; 
-            ctx.lineCap = 'round'; 
-            ctx.strokeStyle = colorPicker.value;
-            ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over'; 
-            ctx.beginPath(); ctx.moveTo(lastPos.x, lastPos.y); ctx.lineTo(currentPos.x, currentPos.y); ctx.stroke(); 
-            lastPos = currentPos; 
-          } else if (savedCanvasState) { 
-            ctx.putImageData(savedCanvasState, 0, 0); 
-            drawFinalShape(startPos, currentPos); 
-          }
+          if (activeTool === 'draw' || activeTool === 'erase') { ctx.lineWidth = +sizeInput.value; ctx.lineCap = 'round'; ctx.strokeStyle = colorPicker.value; ctx.globalCompositeOperation = activeTool === 'erase' ? 'destination-out' : 'source-over'; ctx.beginPath(); ctx.moveTo(lastPos.x, lastPos.y); ctx.lineTo(currentPos.x, currentPos.y); ctx.stroke(); lastPos = currentPos; }
+          else if (savedCanvasState) { ctx.putImageData(savedCanvasState, 0, 0); drawFinalShape(startPos, currentPos); }
         };
         const endDrawing = async (e) => {
             if (!isDrawing) return; e.preventDefault(); const posEvent = e.changedTouches ? e.changedTouches[0] : e;
-            if (savedCanvasState) {
-                ctx.putImageData(savedCanvasState, 0, 0);
-                drawFinalShape(startPos, getPos(posEvent));
-            }
+            if (savedCanvasState) { ctx.putImageData(savedCanvasState, 0, 0); drawFinalShape(startPos, getPos(posEvent)); }
             isDrawing = false; savedCanvasState = null; 
             scene.sketch = await getCanvasBlob(canvas); await update(); $('.tab[data-tab="storyboard"]', el).classList.add('has-content');
         };
@@ -537,21 +503,13 @@
         $('.clear', controls).onclick = async () => { ctx.clearRect(0, 0, canvas.width, canvas.height); scene.sketch = null; await update(); $('.tab[data-tab="storyboard"]', el).classList.remove('has-content'); };
         
         $('.btn-add-to-refs', el).onclick = async () => {
-          if (!scene.sketch) {
-            alert('El storyboard está vacío. Dibuja algo antes de añadirlo a las referencias.');
-            return;
-          }
+          if (!scene.sketch) { alert('El storyboard está vacío. Dibuja algo antes de añadirlo a las referencias.'); return; }
           const blob = await getCanvasBlob(canvas);
-          const newRef = {
-            id: uid(),
-            name: `Storyboard Shot - ${new Date().toLocaleTimeString()}.png`,
-            data: blob
-          };
+          const newRef = { id: uid(), name: `Storyboard Shot - ${new Date().toLocaleTimeString()}.png`, data: blob };
           if (!scene.refs) { scene.refs = []; }
           scene.refs.push(newRef);
           await updateAndRender();
         };
-        
         return el;
       }
       
@@ -566,10 +524,7 @@
       const formatDialog = { overlay: $('#format-dialog-overlay'), btnPng: $('#format-btn-png'), btnJpg: $('#format-btn-jpg') };
       function showExportFormatDialog(scene, index) {
         formatDialog.overlay.hidden = false;
-        const exportAndHide = (format) => {
-          exportStoryboardImage(scene, index, format);
-          formatDialog.overlay.hidden = true;
-        };
+        const exportAndHide = (format) => { exportStoryboardImage(scene, index, format); formatDialog.overlay.hidden = true; };
         formatDialog.btnPng.onclick = () => exportAndHide('png');
         formatDialog.btnJpg.onclick = () => exportAndHide('jpeg');
         formatDialog.overlay.onclick = (e) => { if(e.target === formatDialog.overlay) formatDialog.overlay.hidden = true; };
@@ -577,31 +532,13 @@
       
       async function exportStoryboardImage(scene, index, format = 'png') {
         if (!(scene.sketch instanceof Blob)) return;
-        const mimeType = `image/${format}`;
-        const extension = format;
-        const quality = 0.9;
-        
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        const img = new Image();
-
+        const mimeType = `image/${format}`; const extension = format; const quality = 0.9;
+        const tempCanvas = document.createElement('canvas'); const tempCtx = tempCanvas.getContext('2d'); const img = new Image();
         img.onload = () => {
-          tempCanvas.width = img.width;
-          tempCanvas.height = img.height;
-          
+          tempCanvas.width = img.width; tempCanvas.height = img.height;
           const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
-          tempCtx.fillStyle = bgColor;
-          tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-          tempCtx.drawImage(img, 0, 0);
-
-          tempCanvas.toBlob(blob => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `storyboard-${slug(scene.title || `secuencia-${index+1}`)}.${extension}`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-          }, mimeType, quality);
-
+          tempCtx.fillStyle = bgColor; tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); tempCtx.drawImage(img, 0, 0);
+          tempCanvas.toBlob(blob => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `storyboard-${slug(scene.title || `secuencia-${index+1}`)}.${extension}`; a.click(); URL.revokeObjectURL(a.href); }, mimeType, quality);
           URL.revokeObjectURL(img.src);
         };
         img.src = URL.createObjectURL(scene.sketch);
@@ -619,252 +556,39 @@
       $('#btn-add').onclick = async () => { state.scenes.push(defaultScene()); await persist(); render(); };
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Proyecto de Escaleta'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
-      // CORRECCIÓN: PDF Worker actualizado para incluir nombres de imágenes de referencia.
-      const pdfWorkerScript = `
-        self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-
-        self.onmessage = async (e) => {
-            try {
-                const { state } = e.data;
-                const { jsPDF } = self.jspdf;
-                const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-
-                const MARGIN = 40;
-                const PAGE_W = doc.internal.pageSize.getWidth();
-                const PAGE_H = doc.internal.pageSize.getHeight();
-                const CONTENT_W = PAGE_W - MARGIN * 2;
-                const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
-                
-                let cursorY = MARGIN;
-
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(24);
-                doc.text(state.title || 'Proyecto de Escaleta', PAGE_W / 2, cursorY + 20, { align: 'center' });
-                cursorY += 40;
-
-                if (state.author) {
-                    doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(14);
-                    doc.text(\`Por: \${state.author}\`, PAGE_W / 2, cursorY + 20, { align: 'center' });
-                    cursorY += 30;
-                }
-                
-                if (state.synopsis) {
-                    cursorY += 30;
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(12);
-                    doc.text('Sinopsis', MARGIN, cursorY);
-                    cursorY += 20;
-                    doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(10);
-                    const synopsisLines = doc.splitTextToSize(state.synopsis, CONTENT_W);
-                    doc.text(synopsisLines, MARGIN, cursorY);
-                    cursorY += synopsisLines.length * 12;
-                }
-
-                for (let i = 0; i < state.scenes.length; i++) {
-                    const scene = state.scenes[i];
-                    doc.addPage();
-                    let y = MARGIN;
-
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(16);
-                    doc.text(\`SECUENCIA \${i + 1}: \${scene.title || 'Sin título'}\`, MARGIN, y);
-                    y += 30;
-
-                    doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(9);
-                    doc.setTextColor(100);
-                    if (scene.location) { doc.text(\`Localización: \${scene.location}\`, MARGIN, y); y += 15; }
-                    if (scene.tags && scene.tags.length > 0) { doc.text(\`Etiquetas: \${scene.tags.join(', ')}\`, MARGIN, y); y += 15; }
-                    y += 10;
-                    
-                    if (scene.description) {
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(12);
-                        doc.setTextColor(0);
-                        doc.text('Descripción', MARGIN, y);
-                        y += 20;
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(10);
-                        const descLines = doc.splitTextToSize(scene.description, CONTENT_W);
-                        if (y + descLines.length * 12 > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
-                        doc.text(descLines, MARGIN, y);
-                        y += (descLines.length * 12) + 20;
-                    }
-
-                    if (scene.sketch && typeof scene.sketch === 'string') {
-                        if (y + 40 > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(12);
-                        doc.setTextColor(0);
-                        doc.text('Storyboard', MARGIN, y);
-                        y += 20;
-                        const imgHeight = CONTENT_W * 9 / 16;
-                        if (y + imgHeight > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
-                        try {
-                            doc.addImage(scene.sketch, 'PNG', MARGIN, y, CONTENT_W, imgHeight);
-                            y += imgHeight + 20;
-                        } catch (err) {
-                            doc.text('Error: No se pudo añadir la imagen del storyboard.', MARGIN, y); y += 20;
-                        }
-                    }
-
-                    const refs = scene.refs.filter(r => r.data && typeof r.data === 'string');
-                    if (refs.length > 0) {
-                        if (y + 40 > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(12);
-                        doc.setTextColor(0);
-                        doc.text('Referencias', MARGIN, y);
-                        y += 20;
-                        const imgWidth = (CONTENT_W / 2) - 5;
-                        const imgHeight = imgWidth * 9 / 16;
-                        
-                        for (let j = 0; j < refs.length; j++) {
-                            const ref = refs[j];
-                            const x = MARGIN + (j % 2) * (imgWidth + 10);
-                            
-                            const textHeight = ref.name ? (doc.splitTextToSize(ref.name, imgWidth).length * 10) : 0;
-                            const totalItemHeight = imgHeight + textHeight + 15;
-                            
-                            if (y + totalItemHeight > PAGE_H - MARGIN) {
-                                doc.addPage();
-                                y = MARGIN;
-                            }
-
-                            try {
-                                doc.addImage(ref.data, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');
-                            } catch(err) {
-                                doc.text('Error img.', x, y + imgHeight / 2);
-                            }
-
-                            if(ref.name) {
-                                doc.setFontSize(8);
-                                doc.setTextColor(100);
-                                const captionLines = doc.splitTextToSize(ref.name, imgWidth);
-                                doc.text(captionLines, x, y + imgHeight + 10);
-                            }
-
-                            if (j % 2 !== 0 || j === refs.length - 1) {
-                                y += totalItemHeight;
-                            }
-                        }
-                    }
-                }
-
-                const pdfBlob = doc.output('blob');
-                self.postMessage({ blob: pdfBlob, filename: \`\${slug(state.title || 'proyecto')}.pdf\` });
-
-            } catch (error) {
-                self.postMessage({ error: error.message + ' Stack: ' + error.stack });
-            }
-        };
-      `;
+      const pdfWorkerScript = `self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');self.onmessage=async e=>{try{const{state:t}=e.data,{jsPDF:a}=self.jspdf,s=new a({unit:"pt",format:"a4"}),r=40,o=s.internal.pageSize.getWidth(),d=s.internal.pageSize.getHeight(),n=o-80,l=t=>t.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9\\s-]/g,"").replace(/[\\s-]+/g,"-").replace(/(^-|-$)/g,"");let c=r;s.setFont("helvetica","bold"),s.setFontSize(24),s.text(t.title||"Proyecto de Escaleta",o/2,c+20,{align:"center"}),c+=40,t.author&&(s.setFont("helvetica","normal"),s.setFontSize(14),s.text(\`Por: \${t.author}\`,o/2,c+20,{align:"center"}),c+=30),t.synopsis&&(c+=30,s.setFont("helvetica","bold"),s.setFontSize(12),s.text("Sinopsis",r,c),c+=20,s.setFont("helvetica","normal"),s.setFontSize(10),(()=>{const e=s.splitTextToSize(t.synopsis,n);s.text(e,r,c),c+=12*e.length})());for(let e=0;e<t.scenes.length;e++){const a=t.scenes[e];s.addPage();let c=r;s.setFont("helvetica","bold"),s.setFontSize(16),s.text(\`SECUENCIA \${e+1}: \${a.title||"Sin título"}\`,r,c),c+=30,s.setFont("helvetica","normal"),s.setFontSize(9),s.setTextColor(100),a.location&&(s.text(\`Localización: \${a.location}\`,r,c),c+=15),a.tags&&a.tags.length>0&&(s.text(\`Etiquetas: \${a.tags.join(", ")}\`,r,c),c+=15),c+=10,a.description&&(s.setFont("helvetica","bold"),s.setFontSize(12),s.setTextColor(0),s.text("Descripción",r,c),c+=20,s.setFont("helvetica","normal"),s.setFontSize(10),(()=>{const t=s.splitTextToSize(a.description,n);c+12*t.length>d-r&&(s.addPage(),c=r),s.text(t,r,c),c+=12*t.length+20})()),a.sketch&&"string"==typeof a.sketch&&(c+40>d-r&&(s.addPage(),c=r),s.setFont("helvetica","bold"),s.setFontSize(12),s.setTextColor(0),s.text("Storyboard",r,c),c+=20,(()=>{const t=n*9/16;c+t>d-r&&(s.addPage(),c=r);try{s.addImage(a.sketch,"PNG",r,c,n,t),c+=t+20}catch(t){s.text("Error: No se pudo añadir la imagen del storyboard.",r,c),c+=20}})());const p=a.refs.filter(t=>t.data&&"string"==typeof t.data);if(p.length>0){c+40>d-r&&(s.addPage(),c=r),s.setFont("helvetica","bold"),s.setFontSize(12),s.setTextColor(0),s.text("Referencias",r,c),c+=20;const t=(n-10)/2,i=t*9/16;for(let a=0;a<p.length;a++){const o=p[a],l=r+(a%2)*(t+10),u=o.name?10*s.splitTextToSize(o.name,t).length:0,g=i+u+15;c+g>d-r&&(s.addPage(),c=r);try{s.addImage(o.data,"PNG",l,c,t,i,void 0,"FAST")}catch(t){s.text("Error img.",l,c+i/2)}o.name&&(s.setFontSize(8),s.setTextColor(100),(()=>{const a=s.splitTextToSize(o.name,t);s.text(a,l,c+i+10)})()),(a%2!=0||a===p.length-1)&&(c+=g)}}}}catch(t){return void self.postMessage({error:t.message+" Stack: "+t.stack})}const e=s.output("blob");self.postMessage({blob:e,filename:\`\${l(t.title||"proyecto")}.pdf\`})};`;
+      const zipWorkerScript = `self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');self.onmessage=async e=>{const{state:t}=e.data,a=e=>e.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9\\s-]/g,"").replace(/[\\s-]+/g,"-").replace(/(^-|-$)/g,""),s=new JSZip,r=s.folder("assets"),o=JSON.parse(JSON.stringify(t));for(let e=0;e<t.scenes.length;e++){const i=t.scenes[e],n=o.scenes[e];if(i.sketch instanceof Blob){const t=\`sketch-\${i.id}.png\`;r.file(t,i.sketch),n.sketch=\`assets/\${t}\`}if(i.refs&&i.refs.length)for(let t=0;t<i.refs.length;t++){const a=i.refs[t];if(a.data instanceof Blob){const s=a.data.type.split("/")[1]||"png",l=\`ref-\${i.id}-\${a.id}.\${s}\`;r.file(l,a.data),o.scenes[e].refs[t].data=\`assets/\${l}\`}}}s.file("project.json",JSON.stringify(o,null,2));const i=await s.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}});self.postMessage({blob:i,filename:\`\${a(t.title||"proyecto")}.zip\`})};`;
       
-      const zipWorkerScript = `
-        self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
-        self.onmessage = async (e) => {
-          const { state } = e.data;
-          const slug = (s = '') => s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').replace(/[\\s-]+/g, '-').replace(/(^-|-$)/g, '');
-          
-          const zip = new JSZip();
-          const assetsFolder = zip.folder("assets");
-          const stateForJson = JSON.parse(JSON.stringify(state));
-
-          for (let i = 0; i < state.scenes.length; i++) {
-              const sceneWithBlobs = state.scenes[i];
-              const sceneForJson = stateForJson.scenes[i];
-
-              if (sceneWithBlobs.sketch instanceof Blob) {
-                  const filename = \`sketch-\${sceneWithBlobs.id}.png\`;
-                  assetsFolder.file(filename, sceneWithBlobs.sketch);
-                  sceneForJson.sketch = \`assets/\${filename}\`;
-              }
-              if (sceneWithBlobs.refs && sceneWithBlobs.refs.length) {
-                  for (let j = 0; j < sceneWithBlobs.refs.length; j++) {
-                      const refWithBlob = sceneWithBlobs.refs[j];
-                      if (refWithBlob.data instanceof Blob) {
-                          const extension = refWithBlob.data.type.split('/')[1] || 'png';
-                          const filename = \`ref-\${sceneWithBlobs.id}-\${refWithBlob.id}.\${extension}\`;
-                          assetsFolder.file(filename, refWithBlob.data);
-                          stateForJson.scenes[i].refs[j].data = \`assets/\${filename}\`;
-                      }
-                  }
-              }
-          }
-          
-          zip.file("project.json", JSON.stringify(stateForJson, null, 2));
-          const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
-          self.postMessage({ blob: zipBlob, filename: \`\${slug(state.title || 'proyecto')}.zip\` });
-        };
-      `;
-      
-      function createWorker(scriptContent) { 
-          const blob = new Blob([scriptContent], { type: 'application/javascript' }); 
-          return new Worker(URL.createObjectURL(blob)); 
-      }
+      function createWorker(scriptContent) { return new Worker(URL.createObjectURL(new Blob([scriptContent], { type: 'application/javascript' }))); }
 
       async function handleExportWithWorker(button, workerScript) {
         if (button.classList.contains('loading')) return;
-        button.classList.add('loading');
-        button.disabled = true;
-
+        button.classList.add('loading'); button.disabled = true;
         const stateFromDB = await db.project.get(PROJECT_ID);
-        if (!stateFromDB) {
-            alert("No hay proyecto guardado para exportar.");
-            button.classList.remove('loading');
-            button.disabled = false;
-            return;
-        }
+        if (!stateFromDB) { alert("No hay proyecto guardado para exportar."); button.classList.remove('loading'); button.disabled = false; return; }
         
         const worker = createWorker(workerScript);
-
         worker.onmessage = (e) => {
-            if (e.data.error) {
-                console.error('Error desde el Web Worker:', e.data.error);
-                alert('Ocurrió un error al generar el archivo. Revisa la consola para más detalles.');
-            } else {
-                const { blob, filename } = e.data;
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = filename;
-                a.click();
-                URL.revokeObjectURL(a.href);
-            }
-            button.classList.remove('loading');
-            button.disabled = false;
-            worker.terminate();
+            if (e.data.error) { console.error('Error desde el Web Worker:', e.data.error); alert('Ocurrió un error al generar el archivo.'); } 
+            else { const { blob, filename } = e.data; const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href); }
+            button.classList.remove('loading'); button.disabled = false; worker.terminate();
         };
-
-        worker.onerror = (e) => {
-            console.error('Error fatal en el Web Worker:', e.message, e);
-            alert('Ocurrió un error al generar el archivo. Revisa la consola para más detalles.');
-            button.classList.remove('loading');
-            button.disabled = false;
-            worker.terminate();
-        };
+        worker.onerror = (e) => { console.error('Error fatal en el Web Worker:', e.message, e); alert('Ocurrió un error al generar el archivo.'); button.classList.remove('loading'); button.disabled = false; worker.terminate(); };
         
         const stateToExport = stateFromDB;
-
         if (workerScript === pdfWorkerScript) {
-            const stateForExport = JSON.parse(JSON.stringify(stateToExport));
+            // CORRECCIÓN: Se usa structuredClone para crear una copia segura del estado, incluyendo Blobs.
+            const stateForExport = structuredClone(stateToExport);
             const conversionPromises = [];
-
-            for (let i = 0; i < stateToExport.scenes.length; i++) {
-                const originalScene = stateToExport.scenes[i];
-                if (originalScene.sketch instanceof Blob) {
-                    conversionPromises.push(
-                        blobToDataURL(originalScene.sketch).then(dataUrl => { stateForExport.scenes[i].sketch = dataUrl; })
-                    );
+            // Se itera sobre la copia segura y se convierten sus Blobs a data URLs para el worker.
+            for (const scene of stateForExport.scenes) {
+                if (scene.sketch instanceof Blob) {
+                    conversionPromises.push(blobToDataURL(scene.sketch).then(dataUrl => { scene.sketch = dataUrl; }));
                 }
-                if (originalScene.refs) {
-                    for (let j = 0; j < originalScene.refs.length; j++) {
-                        const originalRef = originalScene.refs[j];
-                        if (originalRef.data instanceof Blob) {
-                            conversionPromises.push(
-                                blobToDataURL(originalRef.data).then(dataUrl => { stateForExport.scenes[i].refs[j].data = dataUrl; })
-                            );
+                if (scene.refs) {
+                    for (const ref of scene.refs) {
+                        if (ref.data instanceof Blob) {
+                            conversionPromises.push(blobToDataURL(ref.data).then(dataUrl => { ref.data = dataUrl; }));
                         }
                     }
                 }
@@ -884,28 +608,23 @@
         showDialog({ title: 'Importar Proyecto desde ZIP', message: 'Esto reemplazará tu proyecto actual. ¿Estás seguro?', confirmText: 'Sí, importar',
             onConfirm: async () => {
                 try {
-                    const zip = await JSZip.loadAsync(file);
-                    const projectFile = zip.file("project.json");
+                    const zip = await JSZip.loadAsync(file); const projectFile = zip.file("project.json");
                     if (!projectFile) throw new Error("El archivo project.json no se encontró en el ZIP.");
-                    const jsonText = await projectFile.async("string"); const data = JSON.parse(jsonText);
-                    const loadingPromises = [];
+                    const jsonText = await projectFile.async("string"); const data = JSON.parse(jsonText); const loadingPromises = [];
                     for (const scene of data.scenes) {
                         if (typeof scene.sketch === 'string' && scene.sketch.startsWith('assets/')) {
-                            const sketchFile = zip.file(scene.sketch);
-                            if(sketchFile) loadingPromises.push(sketchFile.async("blob").then(blob => { scene.sketch = blob; }));
+                            const sketchFile = zip.file(scene.sketch); if(sketchFile) loadingPromises.push(sketchFile.async("blob").then(blob => { scene.sketch = blob; }));
                         }
                         if (scene.refs) {
                             for (const ref of scene.refs) {
                                 if (typeof ref.data === 'string' && ref.data.startsWith('assets/')) {
-                                    const refFile = zip.file(ref.data);
-                                    if(refFile) loadingPromises.push(refFile.async("blob").then(blob => { ref.data = blob; }));
+                                    const refFile = zip.file(ref.data); if(refFile) loadingPromises.push(refFile.async("blob").then(blob => { ref.data = blob; }));
                                 }
                             }
                         }
                     }
                     await Promise.all(loadingPromises);
-                    state = data;
-                    state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; });
+                    state = data; state.scenes.forEach(s => { if (!s.tags) s.tags = []; if (!s.refs) s.refs = []; if (!s.locationURL) s.locationURL = null; if (!s.statusColor) s.statusColor = null; });
                     await persist(); render();
                 } catch (err) { alert('Error al importar el archivo ZIP.\n\n' + err.message); } 
                 finally { e.target.value = ''; }
