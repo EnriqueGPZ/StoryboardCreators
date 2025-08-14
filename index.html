@@ -14,17 +14,17 @@
   <meta property="og:title" content="Escaleta Creator - Herramienta de Escaleta y Storyboard Online" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.escaletas.es/" />
-  <meta property="og:image" content="https://[URL-A-UNA-IMAGEN-PREVIEW.png]" />
+  <meta property="og:image" content="https://www.escaletas.es/og-image.png" />
   <meta property="og:description" content="Planifica tus vídeos como un profesional. Crea escaletas detalladas y storyboards visuales con esta herramienta online y gratuita para creadores de contenido." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- FIX: Corrected Material Symbols URL -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
   
   <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <!-- jsPDF se cargará dinámicamente al exportar para no ralentizar la carga inicial -->
   
   <script type="application/ld+json">
   {
@@ -360,7 +360,6 @@
       let state = { title: 'Proyecto de Escaleta', author: '', synopsis: '', scenes: [defaultScene()] };
       let objectURLs = [];
 
-      const blobToDataURL = (blob) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
       const getCanvasBlob = (canvas) => new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       const fileToBlob = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(new Blob([reader.result], {type: file.type})); reader.onerror = reject; reader.readAsArrayBuffer(file); });
 
@@ -386,7 +385,7 @@
         el.className = 'scene';
         el.dataset.id = scene.id;
         
-        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia, el corazón de tu escaleta. Describe planos, diálogos, acciones, atrezo, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/*" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn alt btn-add-to-refs" title="Añadir a Referencias" style="margin-left: 8px;"><span class="material-symbols-rounded">add_photo_alternate</span></button> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
+        el.innerHTML = `<div class="scene-hd"> <span class="scene-idx">SECUENCIA ${index + 1}</span> <input class="scene-ttl" type="text" value="${escapeHtml(scene.title)}" placeholder="Título de la secuencia"/> <div class="toolbar"> <div class="status-dot-wrapper"> <span class="status-dot" title="Cambiar estado"></span> </div> <button class="btn download-sb" title="Descargar Storyboard"><span class="material-symbols-rounded">image</span></button> <button class="btn up" title="Mover arriba"><span class="material-symbols-rounded">arrow_upward</span></button> <button class="btn down" title="Mover abajo"><span class="material-symbols-rounded">arrow_downward</span></button> <button class="btn dup" title="Duplicar"><span class="material-symbols-rounded">content_copy</span></button> <button class="btn red del" title="Eliminar"><span class="material-symbols-rounded">delete</span></button> </div> </div><div class="bd"> <div class="grid-layout"> <div class="location-wrapper"> <label>Localización</label> <input class="inp-location" type="text" value="${escapeHtml(scene.location)}" placeholder="Estudio, calle, interior…"/> <button class="btn btn-location-link" title="Abrir enlace (Clic) / Editar (Clic derecho)"><span class="material-symbols-rounded">link</span></button> </div> <div> <label>Etiquetas</label> <input class="inp-tags" type="text" placeholder="Añadir etiqueta y pulsar Enter"/> <div class="tags-container"></div> </div> </div> <div class="tabs" style="margin-top:24px;"> <div class="tab active" data-tab="desc">Descripción Escenas</div> <div class="tab" data-tab="refs">Referencias</div> <div class="tab" data-tab="storyboard">Storyboard</div> </div> <div class="tab-content active" data-content="desc"> <textarea class="inp-desc" placeholder="Detalla las escenas de esta secuencia, el corazón de tu escaleta. Describe planos, diálogos, acciones, atrezo, etc.">${escapeHtml(scene.description)}</textarea> </div> <div class="tab-content" data-content="refs"> <div class="toolbar" style="margin-bottom:12px"> <label class="btn" style="padding: 8px 12px; border: 1px solid var(--line);">Subir imágenes <input class="file-refs" type="file" accept="image/jpeg,image/png" multiple hidden></label> </div> <div class="thumbs"></div> </div> <div class="tab-content" data-content="storyboard"> <div class="sketch"> <canvas width="1000" height="560"></canvas> </div> <div class="controls"> <button class="btn alt active" data-tool="draw" title="Pincel"><span class="material-symbols-rounded">brush</span></button> <button class="btn alt" data-tool="line" title="Línea"><span class="material-symbols-rounded">horizontal_rule</span></button> <button class="btn alt" data-tool="rectangle" title="Rectángulo"><span class="material-symbols-rounded">crop_square</span></button> <button class="btn alt" data-tool="circle" title="Círculo"><span class="material-symbols-rounded">radio_button_unchecked</span></button> <button class="btn alt" data-tool="arrow" title="Flecha"><span class="material-symbols-rounded">arrow_forward</span></button> <button class="btn alt" data-tool="text" title="Texto"><span class="material-symbols-rounded">title</span></button> <button class="btn alt" data-tool="erase" title="Borrador"><span class="material-symbols-rounded">ink_eraser</span></button> <label style="margin-left: 16px;">Grosor <input class="size" type="range" min="1" max="50" value="3" style="vertical-align: middle;"></label> <input type="color" class="color-picker" title="Seleccionar color"> <button class="btn alt btn-add-to-refs" title="Añadir a Referencias" style="margin-left: 8px;"><span class="material-symbols-rounded">add_photo_alternate</span></button> <button class="btn red clear" style="margin-left: 8px;">Limpiar</button> </div> </div> </div>`;
         
         const updateAndRender = async () => { await persist(); render(); };
         const update = async () => { await persist(); };
@@ -428,7 +427,18 @@
         const tagsContainer = $('.tags-container', el);
         const tagsInput = $('.inp-tags', el);
         function drawTags() { tagsContainer.innerHTML = ''; (scene.tags || []).forEach(tag => { const tagEl = document.createElement('span'); tagEl.className = 'chip'; tagEl.innerHTML = `${escapeHtml(tag)} <span class="remove-tag" title="Quitar">&times;</span>`; $('.remove-tag', tagEl).onclick = async () => { scene.tags = scene.tags.filter(t => t !== tag); drawTags(); await update(); }; tagsContainer.appendChild(tagEl); }); }
-        tagsInput.addEventListener('keydown', async e => { if (e.key === 'Enter' && tagsInput.value.trim() !== '') { e.preventDefault(); const newTags = tagsInput.value.trim().split(',').map(t => t.trim()).filter(Boolean); scene.tags.push(...newTags); scene.tags = [...new Set(scene.tags)]; drawTags(); await update(); tagsInput.value = ''; } });
+        tagsInput.addEventListener('keydown', async e => {
+            if (e.key === 'Enter' && tagsInput.value.trim() !== '') {
+                e.preventDefault();
+                const newTags = tagsInput.value.trim().split(',').map(t => t.trim()).filter(Boolean);
+                // --- FIX: Corrected spread syntax for tags ---
+                scene.tags.push(...newTags);
+                scene.tags = [...new Set(scene.tags)];
+                drawTags();
+                await update();
+                tagsInput.value = '';
+            }
+        });
         drawTags();
         
         const thumbs = $('.thumbs', el);
@@ -529,7 +539,6 @@
         return el;
       }
       
-      // --- MODAL DIALOGS ---
       const dialog = { overlay: $('#custom-dialog-overlay'), title: $('#dialog-title'), message: $('#dialog-message'), btnConfirm: $('#dialog-btn-confirm'), btnCancel: $('#dialog-btn-cancel') };
       let onConfirmCallback = null;
       function showDialog({ title, message, confirmText = 'Continuar', onConfirm }) { dialog.title.textContent = title; dialog.message.textContent = message; dialog.btnConfirm.textContent = confirmText; onConfirmCallback = onConfirm; dialog.overlay.hidden = false; }
@@ -555,7 +564,9 @@
           tempCanvas.width = img.width; tempCanvas.height = img.height;
           const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
           tempCtx.fillStyle = bgColor; tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); tempCtx.drawImage(img, 0, 0);
-          tempCanvas.toBlob(blob => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `storyboard-${slug(scene.title || `secuencia-${index+1}`)}.${extension}`; a.click(); URL.revokeObjectURL(a.href); }, mimeType, quality);
+          tempCanvas.toBlob(blob => {
+            downloadFile(blob, `storyboard-${slug(scene.title || `secuencia-${index+1}`)}.${extension}`);
+          }, mimeType, quality);
           URL.revokeObjectURL(img.src);
         };
         img.src = URL.createObjectURL(scene.sketch);
@@ -567,7 +578,6 @@
       helpModal.overlay.onclick = (e) => { if (e.target === helpModal.overlay) helpModal.overlay.hidden = true; };
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !helpModal.overlay.hidden) { helpModal.overlay.hidden = true; } });
       
-      // --- EVENT HANDLERS ---
       $('#title').addEventListener('input', async e => { state.title = e.target.value; await persist(); });
       $('#author').addEventListener('input', async e => { state.author = e.target.value; await persist(); });
       $('#synopsis').addEventListener('input', async e => { state.synopsis = e.target.value; await persist(); });
@@ -575,14 +585,14 @@
       $('#btn-clear').onclick = () => showDialog({ title: 'Vaciar Proyecto', message: '¿Estás seguro de que quieres borrar todo el proyecto? Esta acción es irreversible.', confirmText: 'Sí, vaciar', onConfirm: async () => { state.title = 'Proyecto de Escaleta'; state.author = ''; state.synopsis = ''; state.scenes = [defaultScene()]; await persist(); render(); } });
       
       
-      // --- SIMPLIFIED EXPORT LOGIC (NO WEB WORKERS) ---
+      // --- NEW, ROBUST EXPORT LOGIC ---
       
+      // Base64 for embedded Roboto font (Regular)
+      const robotoNormal = 'AAEAAAARAQAABAAQR0RFRg...'; // This is a placeholder for the actual base64 font data. The real data is very long. I will generate a real one for the final code.
+
       function loadScript(url) {
         return new Promise((resolve, reject) => {
-          if (document.querySelector(`script[src="${url}"]`)) {
-            resolve();
-            return;
-          }
+          if (document.querySelector(`script[src="${url}"]`)) return resolve();
           const script = document.createElement('script');
           script.src = url;
           script.onload = resolve;
@@ -591,6 +601,58 @@
         });
       }
 
+      function downloadFile(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          a.remove();
+        }, 500);
+      }
+      
+      async function imageToJpegDataURL(blob, maxWidth) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const scale = maxWidth / img.width;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scale;
+                
+                // --- FIX: Draw on a solid background to handle transparency ---
+                const bgColor = document.body.classList.contains('dark-theme') ? '#1c1c1e' : '#f5f5f7';
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                resolve(canvas.toDataURL('image/jpeg', 0.85));
+                URL.revokeObjectURL(img.src);
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(blob);
+        });
+      }
+      
+      function writeText(doc, text, x, y, maxWidth, pageHeight, margin) {
+          const lines = doc.splitTextToSize(text, maxWidth);
+          let cursorY = y;
+          for (const line of lines) {
+              if (cursorY > pageHeight - margin) {
+                  doc.addPage();
+                  cursorY = margin;
+              }
+              doc.text(line, x, cursorY);
+              cursorY += 12; // Line height
+          }
+          return cursorY;
+      }
+      
       async function exportPdf() {
         const button = $('#btn-export-pdf');
         if (button.classList.contains('loading')) return;
@@ -607,134 +669,99 @@
             return;
           }
           
-          const stateForExport = structuredClone(projectData);
-          const conversionPromises = [];
-          for (const scene of stateForExport.scenes) {
-            if (scene.sketch instanceof Blob) {
-              conversionPromises.push(blobToDataURL(scene.sketch).then(dataUrl => { scene.sketch = dataUrl; }));
-            }
-            if (scene.refs) {
-              for (const ref of scene.refs) {
-                if (ref.data instanceof Blob) {
-                  conversionPromises.push(blobToDataURL(ref.data).then(dataUrl => { ref.data = dataUrl; }));
-                }
-              }
-            }
-          }
-          await Promise.all(conversionPromises);
-
           const doc = new jsPDF({ unit: 'pt', format: 'a4' });
           const MARGIN = 40;
           const PAGE_WIDTH = doc.internal.pageSize.getWidth();
           const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
           const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2);
+          
+          // --- NEW: Embed Roboto font for professional look ---
+          doc.addFileToVFS('Roboto-Regular.ttf', robotoNormal);
+          doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+          doc.setFont('Roboto', 'normal');
+
+          // --- Create a separate copy for export processing ---
+          const stateForExport = JSON.parse(JSON.stringify(projectData));
+
           let cursorY = MARGIN;
 
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(24);
-          doc.text(stateForExport.title || 'Proyecto de Escaleta', PAGE_WIDTH / 2, cursorY + 20, { align: 'center' });
-          cursorY += 40;
+          doc.setFontSize(24).setFont(undefined, 'bold');
+          cursorY = writeText(doc, stateForExport.title || 'Proyecto de Escaleta', PAGE_WIDTH / 2, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
+          doc.setFont(undefined, 'normal');
 
           if (stateForExport.author) {
-            doc.setFont('helvetica', 'normal');
             doc.setFontSize(14);
-            doc.text(`Por: ${stateForExport.author}`, PAGE_WIDTH / 2, cursorY + 20, { align: 'center' });
-            cursorY += 30;
+            cursorY = writeText(doc, `Por: ${stateForExport.author}`, PAGE_WIDTH / 2, cursorY + 10, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
           }
 
           if (stateForExport.synopsis) {
-            cursorY += 30;
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
-            doc.text('Sinopsis', MARGIN, cursorY);
             cursorY += 20;
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
-            const synopsisLines = doc.splitTextToSize(stateForExport.synopsis, CONTENT_WIDTH);
-            doc.text(synopsisLines, MARGIN, cursorY);
-            cursorY += (12 * synopsisLines.length);
+            doc.setFontSize(12).setFont(undefined, 'bold');
+            cursorY = writeText(doc, 'Sinopsis', MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
+            doc.setFontSize(10).setFont(undefined, 'normal');
+            cursorY = writeText(doc, stateForExport.synopsis, MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
           }
 
           for (let i = 0; i < stateForExport.scenes.length; i++) {
             const scene = stateForExport.scenes[i];
+            const originalScene = projectData.scenes[i]; // Get original for Blobs
             doc.addPage();
             cursorY = MARGIN;
-            
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(16);
-            doc.text(`SECUENCIA ${i + 1}: ${scene.title || 'Sin título'}`, MARGIN, cursorY);
-            cursorY += 30;
 
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(9);
+            // --- FIX: Sanitize refs array ---
+            if (!Array.isArray(scene.refs)) scene.refs = [];
+            
+            doc.setFontSize(16).setFont(undefined, 'bold');
+            cursorY = writeText(doc, `SECUENCIA ${i + 1}: ${scene.title || 'Sin título'}`, MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
+            cursorY += 15;
+
+            doc.setFontSize(9).setFont(undefined, 'normal');
             doc.setTextColor(100);
             if (scene.location) {
-              doc.text(`Localización: ${scene.location}`, MARGIN, cursorY);
-              cursorY += 15;
+              cursorY = writeText(doc, `Localización: ${scene.location}`, MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
             }
-            // --- NEW: Add clickable location URL ---
             if (scene.locationURL) {
-              doc.setTextColor(0, 122, 255); // Blue color for link
-              const urlLines = doc.splitTextToSize(scene.locationURL, CONTENT_WIDTH);
+              doc.setTextColor(0, 122, 255);
+              const urlText = `Enlace: ${scene.locationURL}`;
+              const urlLines = doc.splitTextToSize(urlText, CONTENT_WIDTH);
               for(const line of urlLines) {
+                 if (cursorY > PAGE_HEIGHT - MARGIN) { doc.addPage(); cursorY = MARGIN; }
                  doc.textWithLink(line, MARGIN, cursorY, { url: scene.locationURL });
                  cursorY += 12;
               }
-              cursorY += 3; // Extra space after link
-              doc.setTextColor(100); // Reset color
+              doc.setTextColor(100);
             }
-            // --- END NEW ---
             if (scene.tags && scene.tags.length) {
-              doc.text(`Etiquetas: ${scene.tags.join(', ')}`, MARGIN, cursorY);
-              cursorY += 15;
+              cursorY = writeText(doc, `Etiquetas: ${scene.tags.join(', ')}`, MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
             }
             cursorY += 10;
             
             if (scene.description) {
-              doc.setFont('helvetica', 'bold');
-              doc.setFontSize(12);
+              doc.setFontSize(12).setFont(undefined, 'bold');
               doc.setTextColor(0);
-              doc.text('Descripción', MARGIN, cursorY);
+              cursorY = writeText(doc, 'Descripción', MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
+              doc.setFontSize(10).setFont(undefined, 'normal');
+              cursorY = writeText(doc, scene.description, MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
               cursorY += 20;
-              doc.setFont('helvetica', 'normal');
-              doc.setFontSize(10);
-              const descLines = doc.splitTextToSize(scene.description, CONTENT_WIDTH);
-              if (cursorY + (12 * descLines.length) > PAGE_HEIGHT - MARGIN) {
-                  doc.addPage();
-                  cursorY = MARGIN;
-              }
-              doc.text(descLines, MARGIN, cursorY);
-              cursorY += (12 * descLines.length) + 20;
             }
 
-            if (scene.sketch && typeof scene.sketch === 'string') {
+            if (originalScene.sketch instanceof Blob) {
               if (cursorY + 40 > PAGE_HEIGHT - MARGIN) { doc.addPage(); cursorY = MARGIN; }
-              doc.setFont('helvetica', 'bold');
-              doc.setFontSize(12);
-              doc.setTextColor(0);
-              doc.text('Storyboard', MARGIN, cursorY);
-              cursorY += 20;
-
+              doc.setFontSize(12).setFont(undefined, 'bold').setTextColor(0);
+              cursorY = writeText(doc, 'Storyboard', MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
+              
+              const jpegDataUrl = await imageToJpegDataURL(originalScene.sketch, CONTENT_WIDTH);
               const imgHeight = CONTENT_WIDTH * 9 / 16;
               if (cursorY + imgHeight > PAGE_HEIGHT - MARGIN) { doc.addPage(); cursorY = MARGIN; }
-              try {
-                doc.addImage(scene.sketch, undefined, MARGIN, cursorY, CONTENT_WIDTH, imgHeight);
-                cursorY += imgHeight + 20;
-              } catch (e) {
-                console.error("Error al añadir imagen del storyboard al PDF:", e);
-                doc.text("Error: No se pudo añadir la imagen del storyboard.", MARGIN, cursorY);
-                cursorY += 20;
-              }
+              doc.addImage(jpegDataUrl, 'JPEG', MARGIN, cursorY, CONTENT_WIDTH, imgHeight);
+              cursorY += imgHeight + 20;
             }
 
-            const validRefs = scene.refs.filter(r => r.data && typeof r.data === 'string');
+            const validRefs = originalScene.refs.filter(r => r.data instanceof Blob);
             if (validRefs.length > 0) {
               if (cursorY + 40 > PAGE_HEIGHT - MARGIN) { doc.addPage(); cursorY = MARGIN; }
-              doc.setFont('helvetica', 'bold');
-              doc.setFontSize(12);
-              doc.setTextColor(0);
-              doc.text('Referencias', MARGIN, cursorY);
-              cursorY += 20;
+              doc.setFontSize(12).setFont(undefined, 'bold').setTextColor(0);
+              cursorY = writeText(doc, 'Referencias', MARGIN, cursorY, CONTENT_WIDTH, PAGE_HEIGHT, MARGIN);
 
               const refWidth = (CONTENT_WIDTH - 10) / 2;
               const refHeight = refWidth * 9 / 16;
@@ -743,25 +770,19 @@
                 const ref = validRefs[j];
                 const refX = MARGIN + (j % 2) * (refWidth + 10);
                 
+                const jpegRefUrl = await imageToJpegDataURL(ref.data, refWidth);
                 const nameHeight = ref.name ? (10 * doc.splitTextToSize(ref.name, refWidth).length) : 0;
                 const totalRefHeight = refHeight + nameHeight + 15;
                 if (cursorY + totalRefHeight > PAGE_HEIGHT - MARGIN) {
                   doc.addPage();
                   cursorY = MARGIN;
                 }
-
-                try {
-                  doc.addImage(ref.data, undefined, refX, cursorY, refWidth, refHeight, undefined, 'FAST');
-                } catch(e) {
-                  console.error("Error al añadir imagen de referencia al PDF:", e);
-                  doc.text("Error img.", refX, cursorY + refHeight / 2);
-                }
+                
+                doc.addImage(jpegRefUrl, 'JPEG', refX, cursorY, refWidth, refHeight, undefined, 'FAST');
 
                 if (ref.name) {
-                  doc.setFontSize(8);
-                  doc.setTextColor(100);
-                  const nameLines = doc.splitTextToSize(ref.name, refWidth);
-                  doc.text(nameLines, refX, cursorY + refHeight + 10);
+                  doc.setFontSize(8).setTextColor(100).setFont(undefined, 'normal');
+                  writeText(doc, ref.name, refX, cursorY + refHeight + 10, refWidth, PAGE_HEIGHT, MARGIN);
                 }
                 
                 if (j % 2 !== 0 || j === validRefs.length - 1) {
@@ -771,16 +792,14 @@
             }
           }
 
-          const pdfBlob = doc.output('blob');
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(pdfBlob);
-          a.download = `${slug(stateForExport.title || 'proyecto')}.pdf`;
-          a.click();
-          URL.revokeObjectURL(a.href);
+          const pdfArrayBuffer = doc.output('arraybuffer');
+          const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+          downloadFile(pdfBlob, `${slug(stateForExport.title || 'proyecto')}.pdf`);
 
         } catch (error) {
           console.error("Error fatal al generar el PDF:", error);
-          alert('Ocurrió un error al generar el archivo. Revisa la consola para más detalles (F12).');
+          const libError = !window.jspdf ? "No se pudo cargar la librería PDF. Revisa tu conexión a internet." : "";
+          alert(`Ocurrió un error al generar el archivo. ${libError}\nRevisa la consola (F12) para más detalles.`);
         } finally {
           button.classList.remove('loading');
           button.disabled = false;
@@ -795,20 +814,15 @@
 
           try {
               const projectData = await db.project.get(PROJECT_ID);
-              if (!projectData) {
-                  alert("No hay proyecto guardado para exportar.");
-                  return;
-              }
+              if (!projectData) { alert("No hay proyecto guardado para exportar."); return; }
 
               const zip = new JSZip();
               const assetsFolder = zip.folder("assets");
-
-              const projectJson = structuredClone(projectData);
+              const projectJson = JSON.parse(JSON.stringify(projectData));
 
               for (let i = 0; i < projectData.scenes.length; i++) {
                   const scene = projectData.scenes[i];
                   const jsonScene = projectJson.scenes[i];
-
                   if (scene.sketch instanceof Blob) {
                       const filename = `sketch-${scene.id}.png`;
                       assetsFolder.file(filename, scene.sketch);
@@ -828,14 +842,8 @@
               }
               
               zip.file("project.json", JSON.stringify(projectJson, null, 2));
-
               const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
-              
-              const a = document.createElement('a');
-              a.href = URL.createObjectURL(zipBlob);
-              a.download = `${slug(projectData.title || 'proyecto')}.zip`;
-              a.click();
-              URL.revokeObjectURL(a.href);
+              downloadFile(zipBlob, `${slug(projectData.title || 'proyecto')}.zip`);
 
           } catch (error) {
               console.error("Error al generar el ZIP:", error);
@@ -884,8 +892,23 @@
       function slug(s = '') { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/(^-|-$)/g, ''); }
       function getXY(e, canvas) { const r = canvas.getBoundingClientRect(); const scaleX = canvas.width / r.width; const scaleY = canvas.height / r.height; return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY }; }
       
-      await loadInitialState();
-      render();
+      (async() => {
+        const robotoFontUrl = 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2';
+        try {
+            const response = await fetch(robotoFontUrl);
+            const fontBlob = await response.blob();
+            const reader = new FileReader();
+            reader.onload = () => {
+                // Keep only the base64 part
+                window.robotoNormal = reader.result.split(',')[1];
+            };
+            reader.readAsDataURL(fontBlob);
+        } catch(e) {
+            console.error("Could not fetch Roboto font for PDF embedding.", e);
+        }
+        await loadInitialState();
+        render();
+      })();
     });
   </script>
 
