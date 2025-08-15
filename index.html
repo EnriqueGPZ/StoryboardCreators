@@ -602,19 +602,25 @@
               }
           } catch (error) { console.error("Error al cargar desde IndexedDB:", error); }
       }
-      function revokeObjectURLs() { objectURLs.forEach(url => URL.revokeObjectURL(url)); objectURLs = []; }
-
+      
+      // ====== MEJORA 1: Gestión de ObjectURLs corregida ======
       function render() {
-        revokeObjectURLs();
+        const oldURLs = [...objectURLs];
+        objectURLs = [];
+
         $('#title').value = state.title;
         $('#author').value = state.author;
         $('#synopsis').value = state.synopsis;
+        
         const wrap = $('#scenes');
         wrap.innerHTML = '';
+        
         state.scenes.forEach((s, i) => {
           const sceneEl = renderScene(s, i);
           wrap.appendChild(sceneEl);
         });
+        
+        oldURLs.forEach(url => URL.revokeObjectURL(url));
       }
       
       function renderScene(scene, index) {
@@ -906,7 +912,8 @@
               }
               
               zip.file("project.json", JSON.stringify(projectJson, null, 2));
-              const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
+              // ====== MEJORA 2: Nivel de compresión ZIP optimizado ======
+              const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
               downloadFile(zipBlob, `${slug(projectData.title || 'proyecto')}.zip`);
 
           } catch (error) {
