@@ -159,11 +159,22 @@
 
     .thumbs{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:10px;}
     .thumb{position:relative;background:var(--bg-alt);overflow:hidden;border-radius:4px;}
-    .thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background-color:var(--bg-alt);}
+    .thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background-color:var(--bg-alt); cursor: pointer;}
     .thumb .x{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;font-size:14px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;}
     .thumb .x:hover{background:rgba(0,0,0,0.7);}
-    .thumb .load-on-canvas { position:absolute; bottom:4px; left:4px; background:rgba(0,0,0,0.5); color:#fff; font-size:14px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:50%; }
-    .thumb .load-on-canvas:hover { background:rgba(0,0,0,0.7); }
+    .thumb .load-on-canvas { 
+        position:absolute; bottom: 2px; left: 2px;
+        color:#fff; cursor:pointer; padding: 2px;
+    }
+    .thumb .load-on-canvas .material-symbols-rounded {
+        font-size: 22px;
+        text-shadow: 0 0 4px rgba(0,0,0,0.7);
+        transition: transform .2s;
+    }
+    .thumb .load-on-canvas:hover .material-symbols-rounded {
+        transform: scale(1.1);
+    }
+
 
     .thumb-name-wrapper { padding: 4px 8px 8px; background-color: var(--bg-alt); border-top: 1px solid var(--line); }
     .thumb-name { font-size: 12px; text-align: center; color: var(--muted); padding: 4px; border-radius: 4px; word-break: break-all; cursor: text; transition: background-color .2s, box-shadow .2s; }
@@ -199,7 +210,11 @@
     #format-dialog-box .btn { flex-grow: 1; }
 
     .location-wrapper { position: relative; }
-    .btn-location-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; color: var(--muted); border-radius: 50%; }
+    .btn-location-link { 
+        position: absolute; right: 0; bottom: 0;
+        width: 36px; height: 36px; 
+        color: var(--muted); 
+    }
     .btn-location-link:hover { background-color: transparent; color: var(--txt); }
     .btn-location-link .material-symbols-rounded { font-size: 20px; }
     .btn-location-link.has-link { color: var(--acc); }
@@ -236,6 +251,39 @@
     .btn.loading .spinner { display: inline-block; }
     .btn.loading .material-symbols-rounded, .btn.loading .btn-text { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Lightbox Styles */
+    .lightbox-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 2000; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
+    }
+    .lightbox-overlay:not([hidden]) { opacity: 1; visibility: visible; }
+    .lightbox-content {
+        position: relative; width: 90%; height: 90%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        transform: scale(0.9); transition: transform .3s;
+    }
+    .lightbox-overlay:not([hidden]) .lightbox-content { transform: scale(1); }
+    .lightbox-image {
+        max-width: 100%; max-height: 100%; object-fit: contain;
+        border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .lightbox-caption {
+        color: #fff; text-align: center; margin-top: 12px;
+        font-size: 14px; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 12px;
+    }
+    .lightbox-close {
+        position: absolute;
+        top: 10px; right: 10px;
+        color: white;
+        background: none; border: none;
+        font-size: 40px; font-weight: 300; line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
@@ -319,7 +367,7 @@
   </main>
   
   <script>
-    // ====== MAIN APP SCRIPT V4.0.1 (Refactored by PROGRAMADOR with PDF Export) ======
+    // ====== MAIN APP SCRIPT V4.3.0 (Final UI Polish) ======
 
     document.addEventListener('DOMContentLoaded', () => {
 
@@ -586,6 +634,10 @@
                     const refId = e.target.closest('.thumb').dataset.refId;
                     const ref = scene.refs.find(r => r.id === refId);
                     if (ref) loadImageOntoCanvas($('canvas', sceneEl), ref.data, scene);
+                } else if (e.target.matches('.thumb img')) {
+                    const refId = e.target.closest('.thumb').dataset.refId;
+                    const ref = scene.refs.find(r => r.id === refId);
+                    if (ref) showLightbox(ref);
                 }
             });
             scenesContainer.addEventListener('contextmenu', async e => {
@@ -637,7 +689,7 @@
             scene.refs.forEach(r => {
                 const t = document.createElement('div');
                 t.className = 'thumb'; t.dataset.refId = r.id;
-                t.innerHTML = `<img alt="${escapeHtml(r.name)}"/> <div class="thumb-name-wrapper"><p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar">${escapeHtml(r.name)}</p></div> <div class="x" title="Quitar imagen">&times;</div> <div class="load-on-canvas" title="Cargar en Storyboard"><span class="material-symbols-rounded">edit_document</span></div>`;
+                t.innerHTML = `<img alt="${escapeHtml(r.name)}" title="Ver imagen en grande"/> <div class="thumb-name-wrapper"><p class="thumb-name" contenteditable="true" spellcheck="false" title="Haz clic para editar">${escapeHtml(r.name)}</p></div> <div class="x" title="Quitar imagen">&times;</div> <div class="load-on-canvas" title="Cargar en Storyboard"><span class="material-symbols-rounded">add_photo_alternate</span></div>`;
                 if (r.data instanceof Blob) { $('img', t).src = getURLForBlob(r.data); }
                 thumbs.appendChild(t);
             });
@@ -684,7 +736,7 @@
             return clone;
         }
         
-        // --- DIALOGS, EXPORTING, THEME, etc. ---
+        // --- DIALOGS, EXPORTING, THEME, LIGHTBOX etc. ---
         const dialog = { overlay: $('#custom-dialog-overlay'), title: $('#dialog-title'), message: $('#dialog-message'), btnConfirm: $('#dialog-btn-confirm'), btnCancel: $('#dialog-btn-cancel') };
         let onConfirmCallback = null;
         function showDialog({ title, message, confirmText = 'Continuar', onConfirm }) { dialog.title.textContent = title; dialog.message.textContent = message; dialog.btnConfirm.textContent = confirmText; onConfirmCallback = onConfirm; dialog.overlay.hidden = false; }
@@ -701,6 +753,21 @@
             formatDialog.btnJpg.onclick = () => exportAndHide('jpeg');
             formatDialog.overlay.onclick = (e) => { if(e.target === formatDialog.overlay) formatDialog.overlay.hidden = true; };
         }
+
+        const lightbox = { overlay: $('#lightbox-overlay'), image: $('#lightbox-image'), caption: $('#lightbox-caption'), closeBtn: $('#lightbox-close') };
+        function showLightbox(ref) {
+            if (ref.data instanceof Blob) {
+                lightbox.image.src = getURLForBlob(ref.data);
+                lightbox.caption.textContent = ref.name;
+                lightbox.overlay.hidden = false;
+            }
+        }
+        function hideLightbox() {
+            lightbox.overlay.hidden = true;
+            lightbox.image.src = ''; // Clear src to stop loading/display
+        }
+        lightbox.closeBtn.onclick = hideLightbox;
+        lightbox.overlay.onclick = (e) => { if (e.target === lightbox.overlay) hideLightbox(); };
         
         async function exportStoryboardImage(scene, index, format = 'png') {
             if (!(scene.sketch instanceof Blob)) return;
@@ -759,7 +826,10 @@
         helpModal.btnOpen.onclick = () => { helpModal.overlay.hidden = false; };
         helpModal.btnClose.onclick = () => { helpModal.overlay.hidden = true; };
         helpModal.overlay.onclick = (e) => { if (e.target === helpModal.overlay) helpModal.overlay.hidden = true; };
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !helpModal.overlay.hidden) { helpModal.overlay.hidden = true; } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'Escape' && !helpModal.overlay.hidden) { helpModal.overlay.hidden = true; }
+            if (e.key === 'Escape' && !lightbox.overlay.hidden) { hideLightbox(); }
+        });
 
         /**************************************************/
         /********** PDF EXPORT IMPLEMENTATION **********/
@@ -898,26 +968,32 @@
                         doc.text('Referencias', MARGIN, cursorY);
                         cursorY += 6;
                         
-                        const refWidth = (CONTENT_WIDTH - 10) / 2; // 2 refs per row
+                        const refWidth = (CONTENT_WIDTH - 10) / 2; // 2 refs per row, 10mm gap
                         const refHeight = (refWidth * 9) / 16;
                         let xPos = MARGIN;
 
                         for (const [refIndex, ref] of scene.refs.entries()) {
                             if (ref.data instanceof Blob) {
+                                // Check if we need a new page *before* drawing the image
                                 checkNewPage(refHeight + 10);
                                 const dataUrl = await blobToDataURL(ref.data);
                                 doc.addImage(dataUrl, 'JPEG', xPos, cursorY, refWidth, refHeight);
                                 doc.setFontSize(8); doc.text(ref.name, xPos, cursorY + refHeight + 4);
 
                                 if (refIndex % 2 === 0) {
+                                    // This was the first image in the row, move xPos for the next one
                                     xPos += refWidth + 10;
                                 } else {
+                                    // This was the second image, reset xPos and move cursorY down for the next row
                                     xPos = MARGIN;
                                     cursorY += refHeight + 10;
                                 }
                             }
                         }
-                         if (state.scenes[index].refs.length % 2 !== 0) cursorY += refHeight + 10;
+                         if (state.scenes[index].refs.length % 2 !== 0) {
+                             // If there was an odd number of images, the cursorY wasn't moved down after the last one
+                             cursorY += refHeight + 10;
+                         }
                     }
                 }
                 
@@ -1079,7 +1155,7 @@
         <p>Cada secuencia tiene tres pestañas para organizar la información:</p>
         <ol>
             <li><strong>Descripción Escenas:</strong> Aquí va el texto principal de tu escaleta. Describe acciones, diálogos, planos, sonido, etc.</li>
-            <li><strong>Referencias:</strong> Sube imágenes de referencia (moodboard, localizaciones, vestuario) para esta secuencia. Puedes cambiarles el nombre y cargarlas en el storyboard.</li>
+            <li><strong>Referencias:</strong> Sube imágenes de referencia (moodboard, localizaciones, vestuario) para esta secuencia. Puedes hacer clic en ellas para verlas en grande, cambiarles el nombre y cargarlas en el storyboard.</li>
             <li><strong>Storyboard:</strong> Un lienzo para dibujar tus planos.</li>
         </ol>
 
@@ -1103,5 +1179,13 @@
     </div>
   </div>
 
+  <div id="lightbox-overlay" class="lightbox-overlay" hidden>
+    <div class="lightbox-content">
+      <img id="lightbox-image" class="lightbox-image" src="" alt="Vista previa de referencia">
+      <p id="lightbox-caption" class="lightbox-caption"></p>
+      <button id="lightbox-close" class="lightbox-close" title="Cerrar">&times;</button>
+    </div>
+  </div>
+
 </body>
-</html>
+</html>```
